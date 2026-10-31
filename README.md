@@ -69,6 +69,16 @@ Mục tiêu không phải là một “bản mod” thật nhiều tính năng, 
 - Chat, file, ảnh, sticker, reaction, ghim; ZaSetup; đổi chuông/thông báo.
 - Không test: ARM64, KDE/Fedora runtime, OCR (bản build bỏ OCR vì cần Windows installer).
 
+## Tương thích
+
+| Distro | Chat / UI | Call | Ghi chú |
+|---|---|---|---|
+| Ubuntu 26.04 | Đã test | Voice · Video · Group | Wayland + X11 |
+| Ubuntu 24.04 | Dự kiến | Chưa test | Dùng gói t64 |
+| Debian 12 / 13 | Dự kiến | Chưa test | AppImage + installer |
+| Fedora / RHEL | Dự kiến | Chưa test | Cần rpm-build |
+| Arch Linux | Dự kiến | Chưa test | Chưa có AUR |
+
 ## Giới hạn đã biết
 
 - Phụ thuộc upstream cho phần chuyển đổi macOS → Linux; Zalo đổi internals có thể làm patch vỡ.

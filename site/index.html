@@ -129,29 +129,104 @@
   <div class="section-head reveal">
     <p class="eyebrow">Cài đặt</p>
     <h2>Một lệnh. Không cần root.</h2>
-    <p>Tải repo, lấy AppImage Original mới nhất từ upstream, áp patch và cài vào <code>~/.local</code>.</p>
+    <p>Chọn distro để xem lệnh cài dependency và cách cài Zalux. Lệnh dài sẽ tự xuống dòng, không phải kéo ngang.</p>
   </div>
+
   <div class="install-grid">
-    <div class="code-card reveal">
-      <div class="code-head"><span>Ubuntu / Debian · một dòng</span><button class="copy" data-copy="curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash">Copy</button></div>
-      <pre><code>curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash</code></pre>
-    </div>
-    <div class="code-card reveal">
-      <div class="code-head"><span>Clone + cài</span><button class="copy" data-copy="git clone https://github.com/todo-laterx/zalux.git
+    <article class="distro reveal">
+      <div class="distro-head"><h3>Ubuntu 24.04+ / 26.04</h3><span class="badge tested">Đã test</span></div>
+      <p>Bản đã thử chat, call điện thoại, call video, call nhóm trên Wayland và X11.</p>
+      <div class="code-card">
+        <div class="code-head"><span>Cài một dòng</span><button class="copy" data-copy="curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash">Copy</button></div>
+        <pre><code>curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash</code></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-head"><span>Dependency (nếu thiếu)</span><button class="copy" data-copy="sudo apt install python3 libopus0 pulseaudio-utils libgtk-3-0t64 libnss3 libx11-xcb1 libxcb-dri3-0 libgbm1 libasound2t64 libsecret-1-0">Copy</button></div>
+        <pre><code>sudo apt install python3 libopus0 pulseaudio-utils \
+  libgtk-3-0t64 libnss3 libx11-xcb1 libxcb-dri3-0 \
+  libgbm1 libasound2t64 libsecret-1-0</code></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-head"><span>Gói .deb</span><button class="copy" data-copy="packaging/deb/build.sh /path/to/Zalo.AppImage 26.10.20
+sudo apt install ./dist/zalux_26.10.20_amd64.deb">Copy</button></div>
+        <pre><code>packaging/deb/build.sh /path/to/Zalo.AppImage 26.10.20
+sudo apt install ./dist/zalux_26.10.20_amd64.deb</code></pre>
+      </div>
+    </article>
+
+    <article class="distro reveal">
+      <div class="distro-head"><h3>Debian 12 / 13</h3><span class="badge">Chưa test</span></div>
+      <p>Dùng chung AppImage + installer; gói .deb build trên Debian.</p>
+      <div class="code-card">
+        <div class="code-head"><span>Dependency</span><button class="copy" data-copy="sudo apt install python3 libopus0 pulseaudio-utils libgtk-3-0 libnss3 libx11-xcb1 libxcb-dri3-0 libgbm1 libasound2 libsecret-1-0">Copy</button></div>
+        <pre><code>sudo apt install python3 libopus0 pulseaudio-utils \
+  libgtk-3-0 libnss3 libx11-xcb1 libxcb-dri3-0 \
+  libgbm1 libasound2 libsecret-1-0</code></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-head"><span>Cài đặt</span><button class="copy" data-copy="git clone https://github.com/todo-laterx/zalux.git
 cd zalux
 ./scripts/install-latest.sh">Copy</button></div>
-      <pre><code>git clone https://github.com/todo-laterx/zalux.git
+        <pre><code>git clone https://github.com/todo-laterx/zalux.git
 cd zalux
 ./scripts/install-latest.sh</code></pre>
-    </div>
-    <div class="code-card reveal">
-      <div class="code-head"><span>Gói .deb</span><button class="copy" data-copy="packaging/deb/build.sh /path/to/Zalo.AppImage 26.10.20
-sudo apt install ./dist/zalux_26.10.20_amd64.deb">Copy</button></div>
-      <pre><code>packaging/deb/build.sh /path/to/Zalo.AppImage 26.10.20
-sudo apt install ./dist/zalux_26.10.20_amd64.deb</code></pre>
-    </div>
+      </div>
+    </article>
+
+    <article class="distro reveal">
+      <div class="distro-head"><h3>Fedora / RHEL</h3><span class="badge">Chưa test runtime</span></div>
+      <p>Installer và .rpm có sẵn; cần `rpm-build` khi đóng gói. Chưa thử call trên Fedora thật.</p>
+      <div class="code-card">
+        <div class="code-head"><span>Dependency</span><button class="copy" data-copy="sudo dnf install python3 opus pulseaudio-utils gtk3 nss libX11-xcb libxcb mesa-libgbm alsa-lib libsecret">Copy</button></div>
+        <pre><code>sudo dnf install python3 opus pulseaudio-utils gtk3 nss \
+  libX11-xcb libxcb mesa-libgbm alsa-lib libsecret</code></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-head"><span>Cài + build .rpm</span><button class="copy" data-copy="git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh
+# hoặc: sudo dnf install rpm-build && packaging/rpm/build.sh /path/to/Zalo.AppImage 26.10.20">Copy</button></div>
+        <pre><code>git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh
+
+# gói rpm
+sudo dnf install rpm-build
+packaging/rpm/build.sh /path/to/Zalo.AppImage 26.10.20</code></pre>
+      </div>
+    </article>
+
+    <article class="distro reveal">
+      <div class="distro-head"><h3>Arch Linux</h3><span class="badge">Chưa test</span></div>
+      <p>Dùng installer/AppImage; chưa có package AUR chính thức.</p>
+      <div class="code-card">
+        <div class="code-head"><span>Dependency + cài</span><button class="copy" data-copy="sudo pacman -S python opus pulseaudio gtk3 nss libx11 libxcb mesa alsa-lib libsecret git
+git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh">Copy</button></div>
+        <pre><code>sudo pacman -S python opus pulseaudio gtk3 nss libx11 libxcb \
+  mesa alsa-lib libsecret git
+git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh</code></pre>
+      </div>
+    </article>
   </div>
-  <p class="fine">Cần python3, libopus0, pulseaudio-utils và thư viện Electron cơ bản. Xem <a href="https://github.com/todo-laterx/zalux/blob/main/docs/DEPENDENCIES.md">DEPENDENCIES.md</a>.</p>
+
+  <div class="compat reveal">
+    <h3>Bảng tương thích</h3>
+    <table>
+      <thead><tr><th>Distro</th><th>Chat / UI</th><th>Call</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        <tr><td>Ubuntu 26.04</td><td class="ok">Đã test</td><td class="ok">Voice · Video · Group</td><td>Wayland + X11</td></tr>
+        <tr><td>Ubuntu 24.04</td><td class="warn">Dự kiến</td><td class="warn">Chưa test</td><td>Dùng gói t64</td></tr>
+        <tr><td>Debian 12 / 13</td><td class="warn">Dự kiến</td><td class="warn">Chưa test</td><td>AppImage + installer</td></tr>
+        <tr><td>Fedora / RHEL</td><td class="warn">Dự kiến</td><td class="warn">Chưa test</td><td>Cần rpm-build</td></tr>
+        <tr><td>Arch Linux</td><td class="warn">Dự kiến</td><td class="warn">Chưa test</td><td>Chưa có AUR</td></tr>
+      </tbody>
+    </table>
+    <p class="fine">Bảng sẽ cập nhật khi cộng đồng test thêm. Xem <a href="https://github.com/todo-laterx/zalux/blob/main/docs/DEPENDENCIES.md">DEPENDENCIES.md</a>.</p>
+  </div>
 </section>
 
 <section class="section donate" id="donate">
