@@ -95,7 +95,7 @@ Mục tiêu không phải là một “bản mod” thật nhiều tính năng, 
 curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash
 ```
 
-Script tải repo, tải **AppImage Original từ upstream VN-Linux-Family** (không phải binary nằm trong repo này), áp patch, cài vào `~/.local` và tạo desktop entry.
+Script tải repo, tải **AppImage Zalux từ Releases của repo này** (build từ DMG macOS official), áp patch, cài vào `~/.local` và tạo desktop entry.
 Installer chỉ cần `python3`, `curl`, `git` — **không cần Node/npm**; patch `app.asar` dùng `patches/asar.py`.
 
 Nếu muốn dùng AppImage của riêng bạn (ví dụ tự build từ DMG official):
@@ -138,9 +138,9 @@ Xem [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) để biết gói cần cài v�
 ## Cập nhật khi Zalo ra bản mới
 
 ```bash
-./scripts/check-update.sh      # so sánh DMG official / AppImage upstream / bản đang cài
+./scripts/check-update.sh      # so sánh DMG official / release Zalux / bản đang cài
 ./scripts/update.sh            # tải bản mới + patch + cài
-./scripts/build-from-dmg.sh 26.x.y   # khi upstream chưa có bản tương ứng
+./scripts/build-from-dmg.sh 26.x.y   # khi Zalux chưa có release tương ứng
 ```
 
 Mỗi bản update đều được áp lại bộ patch trong `patches/`; dữ liệu đăng nhập và tin nhắn không bị đụng tới.
@@ -178,8 +178,8 @@ Xem local: mở `site/index.html`.
 Nếu Zalux giúp bạn dùng Zalo trên Linux dễ chịu hơn, hãy chia sẻ repo cho người khác.
 Cách tốt nhất để dự án sống lâu là có thêm người dùng, thêm báo lỗi và thêm người thử trên nhiều distro.
 
-Repo **không** chứa binary Zalo, DMG hay AppImage. Người dùng tự tải từ nguồn chính thức/upstream;
-script trong repo chỉ lo phần chuyển đổi, patch và đóng gói.
+Repo **không** chứa binary Zalo/DMG trong source. AppImage và `.deb` phát hành trong **Releases**, build từ DMG official;
+script trong repo lo phần chuyển đổi, patch và đóng gói.
 
 ## Ủng hộ
 
@@ -198,7 +198,7 @@ Không bắt buộc. Chỉ cần bạn dùng và thấy nó đỡ vướng là �
 
 ## Ghi công & pháp lý
 
-- Toolchain repack: [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux) (MIT) — dùng script/nativelibs/zcall-native của upstream để chuyển **DMG macOS official** sang Linux; không dùng AppImage đóng gói sẵn của họ.
+- Toolchain repack: [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux) (MIT) — dùng script/nativelibs/zcall-native của upstream để chuyển **DMG macOS official** sang Linux. AppImage phát hành bởi Zalux được build từ DMG official, không dùng AppImage đóng gói sẵn của upstream.
 - Âm thanh mặc định: Mixkit Free License.
 - Zalo, logo và tài sản liên quan thuộc VNG Corporation / Zalo.
 - Zalux **không phải** sản phẩm chính thức của Zalo/VNG. Dùng cho mục đích cá nhân;

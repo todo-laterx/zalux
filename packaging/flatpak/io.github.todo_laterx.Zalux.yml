@@ -30,8 +30,8 @@ modules:
       - install -Dm755 packaging/flatpak/zalux.sh /app/bin/zalux
     sources:
       - type: file
-        url: https://github.com/VN-Linux-Family/zalo-for-linux/releases/download/26.10.20/Zalo-26.10.20-Original-12ef36d-x86_64.AppImage
-        sha256: 2c807dd71c593120a3d1fac16085d788cc150980fba738e648afa681625bab64
+        url: https://github.com/todo-laterx/zalux/releases/download/26.10.20/Zalux-26.10.20-x86_64.AppImage
+        sha256: d24ac5311836983a25df12c7c72f5d059c36ca032cbecc6882da8f2a03c325bf
         dest-filename: Zalo.AppImage
       - type: git
         url: https://github.com/todo-laterx/zalux.git

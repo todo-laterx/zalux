@@ -1,21 +1,20 @@
 #!/bin/bash
-# Cài Zalux: lấy AppImage gốc (mặc định từ upstream) rồi áp patch.
+# Cài Zalux từ AppImage trong Releases của repo này (build từ DMG official).
 # Dùng AppImage của bạn:
-#   ZALUX_APPIMAGE_URL=https://... ./scripts/install-latest.sh
-#   ./scripts/install-latest.sh /path/to/Zalo.AppImage
+#   ZALUX_APPIMAGE_URL=/path/to/Zalux.AppImage ./scripts/install-latest.sh
+#   ./scripts/install-latest.sh /path/to/Zalux.AppImage
 set -e
 R="$(cd "$(dirname "$0")/.." && pwd)"
 url="${ZALUX_APPIMAGE_URL:-${1:-}}"
 if [ -z "$url" ]; then
-  echo "Chưa có AppImage — lấy bản Original mới nhất từ upstream VN-Linux-Family/zalo-for-linux..."
-  url=$(curl -s https://api.github.com/repos/VN-Linux-Family/zalo-for-linux/releases/latest | python3 -c 'import json,sys
+  echo "Lấy AppImage mới nhất từ Releases của todo-laterx/zalux..."
+  url=$(curl -s https://api.github.com/repos/todo-laterx/zalux/releases/latest | python3 -c 'import json,sys
 for a in json.load(sys.stdin).get("assets",[]):
   n=a["name"]
-  if "Original" in n and n.endswith("x86_64.AppImage"): print(a["browser_download_url"]); break')
+  if n.startswith("Zalux-") and n.endswith("x86_64.AppImage"): print(a["browser_download_url"]); break')
 fi
-[ -n "$url" ] || { echo "Không thấy AppImage Original x86_64. Dùng ZALUX_APPIMAGE_URL hoặc build từ DMG official." >&2; exit 1; }
+[ -n "$url" ] || { echo "Chưa có AppImage release. Dùng ZALUX_APPIMAGE_URL hoặc scripts/build-from-dmg.sh." >&2; exit 1; }
 echo "Nguồn AppImage: $url"
-echo "Lưu ý: đây là AppImage gốc (upstream); Zalux áp patch sau khi tải."
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 if [ -f "$url" ]; then
   out="$url"
