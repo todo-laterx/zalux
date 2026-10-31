@@ -119,6 +119,9 @@ cd zalux
 
 ### Cách 2: gói hệ thống
 
+Tải `.deb` đóng gói sẵn từ [Releases](https://github.com/todo-laterx/zalux/releases/tag/26.10.20)
+hoặc build tại máy:
+
 ```bash
 # Debian/Ubuntu
 packaging/deb/build.sh /path/to/Zalo.AppImage 26.10.20
