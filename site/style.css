@@ -48,7 +48,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
 .nav-cta:hover{border-color:#3c5773;background:rgba(255,255,255,.06)}
 
 main{max-width:var(--max);margin:0 auto;padding:0 20px}
-.hero{display:grid;grid-template-columns:1.02fr .98fr;gap:56px;align-items:center;min-height:min(760px,88vh);padding:72px 0 56px}
+.hero{display:grid;grid-template-columns:1.02fr .98fr;gap:56px;align-items:center;min-height:min(660px,80vh);padding:56px 0 40px}
 .eyebrow{margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-soft)}
 h1{margin:0;font-size:clamp(42px,6.2vw,76px);line-height:.98;letter-spacing:-.035em;font-weight:760}
 h1 em{font-style:normal;color:var(--accent-soft);display:inline-block;position:relative}
