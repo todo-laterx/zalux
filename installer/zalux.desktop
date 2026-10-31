@@ -1,0 +1,16 @@
+[Desktop Entry]
+Name=Zalux
+Comment=Zalux - Zalo Linux
+Exec=@HOME@/.local/bin/zalux
+Icon=zalux
+Terminal=false
+Type=Application
+StartupWMClass=zalo
+Categories=Network;InstantMessaging;Chat;
+Keywords=zalo;chat;messaging;zalux;
+MimeType=x-scheme-handler/zalo;
+Actions=Quit;
+
+[Desktop Action Quit]
+Name=Thoát Zalux
+Exec=pkill -f .local/opt/zalux/app/zalo

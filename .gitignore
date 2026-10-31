@@ -1,0 +1,7 @@
+dist/
+build/
+*.AppImage
+*.deb
+*.rpm
+*.tar.*
+node_modules/

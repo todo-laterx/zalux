@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+DIR="$HOME/.local/opt/zalux"
+APP="$DIR/app/zalo"
+if [ ! -x "$APP" ]; then
+  echo "Zalux chưa cài. Chạy installer/install.sh <AppImage>." >&2
+  exit 1
+fi
+# Per-user setup: sounds + ZaSetup userscript (idempotent).
+PATCHES="$DIR/patches"
+if [ -f "$PATCHES/install-userscripts.py" ]; then python3 "$PATCHES/install-userscripts.py" >/dev/null 2>&1 || true; fi
+if [ -d "$PATCHES/sounds" ]; then mkdir -p "$HOME/.local/share/zalo-linux/sounds"; cp -n "$PATCHES/sounds/"*.mp3 "$HOME/.local/share/zalo-linux/sounds/" 2>/dev/null || true; fi
+exec /usr/bin/env -u ELECTRON_RUN_AS_NODE "$APP" --no-sandbox --enable-gpu-rasterization --enable-zero-copy --disable-crash-reporter --js-flags=--max-old-space-size=768 "$@"
