@@ -113,7 +113,7 @@ git clone https://github.com/todo-laterx/zalux.git
 cd zalux
 ./scripts/install-latest.sh
 # hoặc chỉ định AppImage có sẵn:
-./installer/install.sh /path/to/Zalo-<version>-Original-x86_64.AppImage
+./installer/install.sh /path/to/Zalux-<version>-x86_64.AppImage
 ~/.local/bin/zalux
 ```
 
