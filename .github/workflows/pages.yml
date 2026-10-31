@@ -12,6 +12,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
+    # GitHub Pages không khả dụng cho repo private trên gói Free.
+    # Job tự bỏ qua khi private; sau khi public, Pages sẽ được bật/triển khai.
+    if: ${{ github.event.repository.private == false }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -19,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
