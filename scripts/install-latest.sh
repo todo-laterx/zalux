@@ -15,6 +15,7 @@ for a in json.load(sys.stdin).get("assets",[]):
 fi
 [ -n "$url" ] || { echo "Chưa có AppImage release. Dùng ZALUX_APPIMAGE_URL hoặc scripts/build-from-dmg.sh." >&2; exit 1; }
 echo "Nguồn AppImage: $url"
+echo "Toolchain: VN-Linux-Family/zalo-for-linux (MIT, Copyright (c) 2024 doandat943); không liên kết."
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 if [ -f "$url" ]; then
   out="$url"

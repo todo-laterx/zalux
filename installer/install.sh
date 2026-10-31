@@ -23,5 +23,7 @@ install -m 0755 "$ROOT/installer/zalux-run" "$BIN"
 mkdir -p "$HOME/.local/share/icons"
 cp "$ROOT/assets/zalux.png" "$HOME/.local/share/icons/zalux.png"
 sed "s#@HOME@#$HOME#g" "$ROOT/installer/zalux.desktop" > "$HOME/.local/share/applications/zalux.desktop"
+cp "$ROOT/THIRD_PARTY_NOTICES.md" "$DIR/THIRD_PARTY_NOTICES.md" 2>/dev/null || true
 echo "Installed Zalux to $DIR"
 echo "Run: $BIN"
+echo "Toolchain: VN-Linux-Family/zalo-for-linux (MIT, Copyright (c) 2024 doandat943); Zalux không liên kết."

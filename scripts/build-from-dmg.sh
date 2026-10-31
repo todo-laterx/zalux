@@ -32,4 +32,5 @@ out=$(ls -t dist/*Original*x86_64.AppImage 2>/dev/null | head -1)
 cp "$out" "$R/dist/Zalux-$VER-x86_64.AppImage"
 chmod +x "$R/dist/Zalux-$VER-x86_64.AppImage"
 sha256sum "$R/dist/Zalux-$VER-x86_64.AppImage"
+echo "Toolchain: VN-Linux-Family/zalo-for-linux (MIT, Copyright (c) 2024 doandat943); không liên kết."
 echo "Xong: $R/dist/Zalux-$VER-x86_64.AppImage"

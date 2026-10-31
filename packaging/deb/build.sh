@@ -12,6 +12,8 @@ rm -rf squashfs-root
 cp -a "$R/patches" "$ROOT/opt/zalux/patches"
 ZALUX_PACKAGE=1 "$ROOT/opt/zalux/patches/apply.sh" "$ROOT/opt/zalux" >/dev/null
 rm -f "$ROOT/opt/zalux/resources/app.asar.orig"
+install -d "$ROOT/usr/share/doc/zalux"
+cp "$R/THIRD_PARTY_NOTICES.md" "$R/LICENSE" "$ROOT/usr/share/doc/zalux/"
 cat > "$ROOT/usr/bin/zalux" <<'WRAP'
 #!/bin/sh
 P=/opt/zalux/patches

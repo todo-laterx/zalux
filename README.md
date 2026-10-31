@@ -15,6 +15,16 @@
 
 </div>
 
+## Nguồn gốc & ghi công
+
+Zalux dùng **toolchain repack MIT** của [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux)
+(Copyright (c) 2024 doandat943) để chuyển **DMG macOS official** sang Linux. AppImage và `.deb` của Zalux
+được build từ DMG official, **không dùng AppImage đóng gói sẵn của upstream**.
+
+Các file `patches/incoming.js` và `patches/zcall-window.js` là bản sửa từ code upstream và giữ nguyên
+copyright/MIT notice. Chi tiết: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Zalux **không liên kết, không được tài trợ và không được VN-Linux-Family chứng thực**.
+
 ## Vì sao có Zalux?
 
 Linux là nơi mình làm việc mỗi ngày. Nhưng Zalo — thứ gần như không thể thiếu để giữ liên lạc với
@@ -198,7 +208,7 @@ Không bắt buộc. Chỉ cần bạn dùng và thấy nó đỡ vướng là �
 
 ## Ghi công & pháp lý
 
-- Toolchain repack: [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux) (MIT) — dùng script/nativelibs/zcall-native của upstream để chuyển **DMG macOS official** sang Linux. AppImage phát hành bởi Zalux được build từ DMG official, không dùng AppImage đóng gói sẵn của upstream.
+- Toolchain repack: [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux) (MIT, Copyright (c) 2024 doandat943) — xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Zalux không liên kết/chứng thực bởi upstream.
 - Âm thanh mặc định: Mixkit Free License.
 - Zalo, logo và tài sản liên quan thuộc VNG Corporation / Zalo.
 - Zalux **không phải** sản phẩm chính thức của Zalo/VNG. Dùng cho mục đích cá nhân;

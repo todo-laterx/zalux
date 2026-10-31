@@ -26,6 +26,7 @@ modules:
       - ZALUX_PACKAGE=1 /app/zalux/patches/apply.sh /app/zalux
       - rm -f /app/zalux/resources/app.asar.orig
       - install -Dm644 assets/zalux.png /app/share/icons/hicolor/512x512/apps/zalux.png
+      - install -Dm644 THIRD_PARTY_NOTICES.md /app/share/doc/zalux/THIRD_PARTY_NOTICES.md
       - install -Dm644 packaging/flatpak/zalux.desktop /app/share/applications/zalux.desktop
       - install -Dm755 packaging/flatpak/zalux.sh /app/bin/zalux
     sources:

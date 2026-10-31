@@ -14,7 +14,8 @@ cp -a "$R/patches" "$WORK/patches"
 ZALUX_PACKAGE=1 "$WORK/patches/apply.sh" "$WORK/app" >/dev/null
 rm -f "$WORK/app/resources/app.asar.orig"
 cp "$R/assets/zalux.png" "$WORK/zalux.png"
-tar -czf "$WORK/zalux-payload.tar.gz" -C "$WORK" app patches
+cp "$R/THIRD_PARTY_NOTICES.md" "$WORK/THIRD_PARTY_NOTICES.md"
+tar -czf "$WORK/zalux-payload.tar.gz" -C "$WORK" app patches THIRD_PARTY_NOTICES.md
 sed "s/@VERSION@/$VER/" "$R/packaging/rpm/zalux.spec" > "$WORK/zalux.spec"
 rpmbuild -bb --define "_sourcedir $WORK" --define "_topdir $WORK/rpm" "$WORK/zalux.spec"
 mkdir -p "$R/dist"; cp "$WORK"/rpm/RPMS/*/*.rpm "$R/dist/"

@@ -1,8 +1,10 @@
 Zalux is an unofficial community project.
 
 - Zalo client, trademarks and assets belong to VNG Corporation / Zalo.
-- This repository does not include or redistribute the Zalo client, DMG, AppImage,
-  or extracted application assets. Users download them from official/upstream sources.
-- Repackaging toolchain: VN-Linux-Family/zalo-for-linux, MIT License.
-- Default sound samples: Mixkit Free License (https://mixkit.co/license/).
-- Patches and scripts: MIT License (see LICENSE).
+- This repository does not include the Zalo client, DMG, AppImage or extracted app assets
+  in its source tree. Release artifacts are built from the official macOS DMG.
+- Repackaging toolchain and derived plugin files: VN-Linux-Family/zalo-for-linux,
+  Copyright (c) 2024 doandat943, MIT License. Full notice: THIRD_PARTY_NOTICES.md.
+- Zalux is not affiliated with, endorsed by, or sponsored by VN-Linux-Family or Zalo/VNG.
+- Default sound samples: Mixkit Free License.
+- Zalux scripts/patches: MIT License (see LICENSE).

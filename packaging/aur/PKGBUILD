@@ -28,6 +28,7 @@ package() {
   rm -f "$pkgdir/opt/zalux/resources/app.asar.orig"
 
   install -Dm644 "$srcdir/zalux/assets/zalux.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/zalux.png"
+  install -Dm644 "$srcdir/zalux/THIRD_PARTY_NOTICES.md" "$pkgdir/usr/share/doc/zalux/THIRD_PARTY_NOTICES.md"
   install -d "$pkgdir/usr/share/applications"
   cat > "$pkgdir/usr/share/applications/zalux.desktop" <<'DESK'
 [Desktop Entry]

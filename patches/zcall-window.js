@@ -1,4 +1,9 @@
 /**
+ * Derived from VN-Linux-Family/zalo-for-linux (MIT).
+ * Copyright (c) 2024 doandat943
+ * Licensed under the MIT License. See THIRD_PARTY_NOTICES.md.
+ */
+/**
  * plugins/zcall/window.js
  *
  * The call window. The engine (its own process) connects to a loopback

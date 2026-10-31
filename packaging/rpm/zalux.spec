@@ -16,7 +16,8 @@ Zalo macOS client repackaged for Linux, with native call engine and local patche
 tar -xzf %{SOURCE0}
 
 %install
-mkdir -p %{buildroot}/opt/zalux %{buildroot}/usr/bin %{buildroot}/usr/share/applications %{buildroot}/usr/share/icons/hicolor/512x512/apps
+mkdir -p %{buildroot}/opt/zalux %{buildroot}/usr/bin %{buildroot}/usr/share/applications %{buildroot}/usr/share/icons/hicolor/512x512/apps %{buildroot}/usr/share/doc/zalux
+cp %{_sourcedir}/THIRD_PARTY_NOTICES.md %{buildroot}/usr/share/doc/zalux/
 cp -a app/. %{buildroot}/opt/zalux/
 cp -a patches %{buildroot}/opt/zalux/patches
 cat > %{buildroot}/usr/bin/zalux <<'WRAP'
