@@ -50,6 +50,18 @@ if [ -f "$HERE/ringtone.wav" ]; then
   cp "$HERE/ringtone.wav" "$DIR/app/zcall-assets/sound/zalo_ringtone.wav"
 fi
 
+
+# 5) notification window: auto-close after 5s (call-ended toast hay bị kẹt)
+python3 - "$DIR" <<'PY2'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]) / 'app' / 'main-dist' / 'main.js'
+s = p.read_text(errors='ignore')
+old = "onSuccessUpdate:function(){y.isVisible()||y.showInactive()}"
+new = "onSuccessUpdate:function(){y.isVisible()||y.showInactive();clearTimeout(y.__zaluxNotiTimer);y.__zaluxNotiTimer=setTimeout(function(){try{y.closeIfSafe&&y.closeIfSafe()}catch(_){}},5000)}"
+if old in s:
+    p.write_text(s.replace(old, new))
+PY2
+
 python3 "$HERE/install-userscripts.py" >/dev/null
 # copy default sounds for a fresh install
 mkdir -p "$HOME/.local/share/zalo-linux/sounds"

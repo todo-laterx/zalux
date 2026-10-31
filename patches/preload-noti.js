@@ -19,3 +19,17 @@
   else apply();
 })();
 // ZALO LINUX NOTI THEME END
+
+// ZALO LINUX NOTI WATCHDOG START
+(function () {
+  // Không để notification rỗng/kẹt trên màn hình sau cuộc gọi.
+  setTimeout(() => {
+    try {
+      const bg = document.getElementById('zbg');
+      const txt = bg ? (bg.innerText || bg.textContent || '').trim() : '';
+      if (!txt) window.close();
+    } catch (_) {}
+  }, 3000);
+  setTimeout(() => { try { window.close(); } catch (_) {} }, 6000);
+})();
+// ZALO LINUX NOTI WATCHDOG END
