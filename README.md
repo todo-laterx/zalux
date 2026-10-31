@@ -95,8 +95,16 @@ Mục tiêu không phải là một “bản mod” thật nhiều tính năng, 
 curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash
 ```
 
-Script tải repo, tải AppImage Original mới nhất từ upstream, áp patch, cài vào `~/.local` và tạo desktop entry.
+Script tải repo, tải **AppImage Original từ upstream VN-Linux-Family** (không phải binary nằm trong repo này), áp patch, cài vào `~/.local` và tạo desktop entry.
 Installer chỉ cần `python3`, `curl`, `git` — **không cần Node/npm**; patch `app.asar` dùng `patches/asar.py`.
+
+Nếu muốn dùng AppImage của riêng bạn (ví dụ tự build từ DMG official):
+```bash
+ZALUX_APPIMAGE_URL=/path/to/Zalo.AppImage ./scripts/install-latest.sh
+# hoặc
+./scripts/install-latest.sh /path/to/Zalo.AppImage
+```
+Repo không chứa/chia sẻ binary Zalo; xem `scripts/build-from-dmg.sh` để build từ DMG official.
 
 ### Cách 1: clone + installer
 
