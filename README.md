@@ -164,7 +164,7 @@ zalux/
 ├── packaging/        deb + rpm + AUR + Flatpak
 ├── scripts/          bootstrap, install-latest, update, check-update, build-from-dmg, uninstall
 ├── docs/             dependencies, packaging
-├── assets/           icon, screenshots, donate QR
+├── assets/           icon, screenshots
 ├── site/             landing page (GitHub Pages)
 ├── .github/          CI
 ├── README.md  LICENSE  NOTICE  TRADEMARK.md  SECURITY.md  CHANGELOG.md
@@ -190,21 +190,6 @@ Cách tốt nhất để dự án sống lâu là có thêm người dùng, thê
 
 Repo **không** chứa binary Zalo/DMG trong source. AppImage và `.deb` phát hành trong **Releases**, build từ DMG official;
 script trong repo lo phần chuyển đổi, patch và đóng gói.
-
-## Ủng hộ
-
-Zalux miễn phí và mã nguồn mở. Nếu bạn thấy hài lòng và muốn mình có thêm thời gian theo các bản
-Zalo mới — thử call, sửa lỗi, cập nhật patch — bạn có thể mời mình một ly cà phê.
-
-<p align="center">
-  <img src="assets/donate.jpg" width="280" alt="QR ủng hộ Zalux">
-</p>
-
-<p align="center">
-  ACB · NGUYEN THANH TUAN · 117717
-</p>
-
-Không bắt buộc. Chỉ cần bạn dùng và thấy nó đỡ vướng là đủ.
 
 ## Ghi công & pháp lý
 
