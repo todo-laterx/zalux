@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zalux — Zalo trên Linux, không Wine</title>
+<meta name="description" content="Zalux mang Zalo macOS chính thức lên Linux: UI gốc, gọi điện native, không Wine. Cài bằng một lệnh.">
+<meta property="og:title" content="Zalux — Zalo trên Linux, không Wine">
+<meta property="og:description" content="UI Zalo macOS, gọi voice/video native, không Wine. Dành cho người dùng Linux.">
+<meta property="og:image" content="assets/setup-sound.png">
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Bỏ qua điều hướng</a>
+<header class="nav">
+  <a class="brand" href="#top" aria-label="Zalux">
+    <img src="assets/zalux.png" alt="" width="28" height="28">
+    <span>Zalux</span>
+  </a>
+  <nav aria-label="Chính">
+    <a href="#features">Tính năng</a>
+    <a href="#call">Gọi điện</a>
+    <a href="#install">Cài đặt</a>
+    <a href="#donate">Ủng hộ</a>
+  </nav>
+  <a class="nav-cta" href="https://github.com/todo-laterx/zalux" target="_blank" rel="noreferrer">GitHub</a>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="hero-copy reveal">
+    <p class="eyebrow">Zalo cho Linux</p>
+    <h1>Zalo trên Linux.<br><em>Không Wine.</em></h1>
+    <p class="lede">Client Zalo macOS chính thức, chuyển sang chạy native trên Linux Electron. Giao diện quen thuộc, gọi điện thật, cài trong một lệnh.</p>
+    <div class="actions">
+      <a class="btn primary" href="#install">Cài đặt ngay</a>
+      <a class="btn ghost" href="#features">Xem tính năng</a>
+    </div>
+    <p class="meta">Ubuntu 26.04 · Wayland / X11 · call voice, video, nhóm</p>
+  </div>
+  <div class="hero-art reveal" aria-label="Ảnh giao diện Zalux">
+    <div class="window">
+      <div class="window-bar"><span></span><span></span><span></span><b>Zalux</b></div>
+      <img src="assets/setup-sound.png" alt="ZaSetup trong Zalux: chọn nhạc chuông và âm thông báo" width="924" height="602">
+    </div>
+    <div class="float-card">
+      <span class="dot"></span>
+      <div><strong>Call native</strong><small>voice · video · group</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="strip reveal" aria-label="So sánh nhanh">
+  <div><span>Web</span><p>Thiếu gọi điện, thông báo chậm</p></div>
+  <div><span>Wine</span><p>Nặng, giật, call chập chờn</p></div>
+  <div class="good"><span>Zalux</span><p>UI macOS, call native, không Wine</p></div>
+</section>
+
+<section class="section" id="features">
+  <div class="section-head reveal">
+    <p class="eyebrow">Tính năng</p>
+    <h2>Đủ tốt để dùng mỗi ngày.</h2>
+    <p>Không phải bản mod nhiều nút. Là Zalo gốc, được làm cho Linux.</p>
+  </div>
+  <div class="bento">
+    <article class="card card-call reveal">
+      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 3.5l3 3-2 3c1.2 2.6 3.4 4.8 6 6l3-2 3 3c.4.4.5 1 .2 1.5-1 1.8-3 2.8-5 2.3C8.5 19 5 15.5 3.7 8.3 3.2 6.3 4.2 4.3 6 3.3c.5-.3 1.1-.2 1.5.2z"/></svg></div>
+      <h3>Gọi điện native</h3>
+      <p>Voice, video và gọi nhóm qua <code>zcall-native</code> + PulseAudio/Opus. Không helper Windows, không Wine.</p>
+      <div class="chips"><span>Đã test Ubuntu</span><span>PulseAudio</span><span>Opus</span></div>
+    </article>
+    <article class="card reveal">
+      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div>
+      <h3>UI Zalo macOS</h3>
+      <p>Chat, file, ảnh, sticker, reaction, ghim — giữ nguyên trải nghiệm gốc.</p>
+    </article>
+    <article class="card reveal">
+      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <h3>ZaSetup</h3>
+      <p>Ẩn “đang soạn tin”, “đã nhận”, “đã xem” chỉ bằng một switch.</p>
+    </article>
+    <article class="card reveal">
+      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14c2-3 4-4 8-4s6 1 8 4"/><path d="M7 17c1.5-1.6 3-2.3 5-2.3s3.5.7 5 2.3"/><path d="M10 20c.7-.8 1.3-1.1 2-1.1s1.3.3 2 1.1"/></svg></div>
+      <h3>12 chuông · 14 thông báo</h3>
+      <p>Nghe thử play/pause từng mẫu, chọn là áp dụng ngay.</p>
+    </article>
+    <article class="card reveal">
+      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
+      <h3>Những chi tiết nhỏ</h3>
+      <p>Call đến căn giữa, lọc camera IR, ẩn titlebar thừa, bỏ tên tài khoản.</p>
+    </article>
+    <article class="card reveal">
+      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg></div>
+      <h3>AppImage · deb · rpm</h3>
+      <p>Cài không cần root, hoặc đóng gói hệ thống. Update theo từng bản Zalo.</p>
+    </article>
+  </div>
+</section>
+
+<section class="section call-section" id="call">
+  <div class="call-copy reveal">
+    <p class="eyebrow">Gọi điện</p>
+    <h2>Gọi thật. Không qua Wine.</h2>
+    <p>Engine native lo signalling, SRTP và audio; UI vẫn là Zalo. Voice, video và gọi nhóm đã được thử trên Ubuntu 26.04, cả Wayland lẫn X11.</p>
+    <ul class="ticks">
+      <li>Voice / video / group call</li>
+      <li>Chọn mic, loa, camera trong cuộc gọi</li>
+      <li>Cuộc gọi đến hiện giữa màn hình</li>
+      <li>Tự lọc camera IR để không bị đen trắng</li>
+    </ul>
+  </div>
+  <div class="call-art reveal" aria-label="Minh hoạ gọi điện">
+    <div class="call-tile">
+      <div class="avatar">ZL</div>
+      <div class="call-name">Cuộc gọi video</div>
+      <div class="call-sub">native · SRTP · Opus</div>
+      <div class="call-actions"><span></span><span></span><span></span></div>
+    </div>
+    <div class="call-side">
+      <div><b>Voice</b><small>Opus 16k</small></div>
+      <div><b>Video</b><small>H.264</small></div>
+      <div><b>Group</b><small>PulseAudio</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="section install" id="install">
+  <div class="section-head reveal">
+    <p class="eyebrow">Cài đặt</p>
+    <h2>Một lệnh. Không cần root.</h2>
+    <p>Tải repo, lấy AppImage Original mới nhất từ upstream, áp patch và cài vào <code>~/.local</code>.</p>
+  </div>
+  <div class="install-grid">
+    <div class="code-card reveal">
+      <div class="code-head"><span>Ubuntu / Debian · một dòng</span><button class="copy" data-copy="curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash">Copy</button></div>
+      <pre><code>curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash</code></pre>
+    </div>
+    <div class="code-card reveal">
+      <div class="code-head"><span>Clone + cài</span><button class="copy" data-copy="git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh">Copy</button></div>
+      <pre><code>git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh</code></pre>
+    </div>
+    <div class="code-card reveal">
+      <div class="code-head"><span>Gói .deb</span><button class="copy" data-copy="packaging/deb/build.sh /path/to/Zalo.AppImage 26.10.20
+sudo apt install ./dist/zalux_26.10.20_amd64.deb">Copy</button></div>
+      <pre><code>packaging/deb/build.sh /path/to/Zalo.AppImage 26.10.20
+sudo apt install ./dist/zalux_26.10.20_amd64.deb</code></pre>
+    </div>
+  </div>
+  <p class="fine">Cần python3, libopus0, pulseaudio-utils và thư viện Electron cơ bản. Xem <a href="https://github.com/todo-laterx/zalux/blob/main/docs/DEPENDENCIES.md">DEPENDENCIES.md</a>.</p>
+</section>
+
+<section class="section donate" id="donate">
+  <div class="donate-copy reveal">
+    <p class="eyebrow">Ủng hộ</p>
+    <h2>Giữ Zalux sống cùng Zalo.</h2>
+    <p>Zalux miễn phí. Nếu nó giúp bạn bớt vướng khi làm việc trên Linux, bạn có thể mời mình một ly cà phê để có thêm thời gian theo bản Zalo mới, thử call và sửa lỗi.</p>
+    <p class="fine">Không bắt buộc. Dùng và chia sẻ cũng là ủng hộ.</p>
+  </div>
+  <figure class="qr reveal">
+    <img src="assets/donate.jpg" alt="QR ủng hộ Zalux" width="260" height="302">
+    <figcaption>ACB · NGUYEN THANH TUAN · 117717</figcaption>
+  </figure>
+</section>
+</main>
+
+<footer>
+  <div class="brand"><img src="assets/zalux.png" alt="" width="22" height="22"><span>Zalux</span></div>
+  <p>Unofficial. Zalo thuộc VNG/Zalo. Không phân phối binary Zalo.</p>
+  <div class="foot-links">
+    <a href="https://github.com/todo-laterx/zalux">GitHub</a>
+    <a href="https://github.com/todo-laterx/zalux/blob/main/LICENSE">MIT</a>
+    <a href="#top">Lên đầu</a>
+  </div>
+</footer>
+<script src="main.js"></script>
+</body>
+</html>

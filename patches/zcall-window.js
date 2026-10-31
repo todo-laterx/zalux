@@ -58,8 +58,8 @@ const { createStore } = require('../advanced-settings/store');
 // group 640x400 (content, under the desktop's own title bar).
 const VOICE_WIDTH = 450;
 const VOICE_HEIGHT = 672;
-const VIDEO_WIDTH = 640;
-const VIDEO_HEIGHT = 400;
+const VIDEO_WIDTH = 960;
+const VIDEO_HEIGHT = 600;
 const COMPACT_WIDTH = 320; // compact: the picture (180) and the bar (50) in the screen's corner
 const COMPACT_HEIGHT = 230;
 const COMPACT_MARGIN = 16;
@@ -107,7 +107,7 @@ let prefs = null;
 
 function loadPrefs() {
   if (prefs) return prefs;
-  prefs = { mic: '', speaker: '', camera: null, noMicBlock: false, noSpeakerBlock: false };
+  prefs = { mic: '', speaker: '', camera: null, noMicBlock: false, noSpeakerBlock: false, videoBounds: null };
   try {
     prefsFile = path.join(require('electron').app.getPath('userData'), 'zcall-devices.json');
     Object.assign(prefs, JSON.parse(fs.readFileSync(prefsFile, 'utf8')));
@@ -222,9 +222,11 @@ function updateDevicesFromZalo(data) {
   } else if (data.defaultAudOutputDevice && data.defaultAudOutputDevice.id) {
     p.speaker = String(data.defaultAudOutputDevice.id);
   }
-  if (data.defaultVidDevice && data.defaultVidDevice.id) {
+  // Không ghi đè camera người dùng đã chọn: Zalo gửi defaultVidDevice mỗi
+  // cuộc gọi và có thể là IR (label hai camera giống nhau). Chỉ lấy default
+  // khi chưa có lựa chọn nào.
+  if (!p.camera && data.defaultVidDevice && data.defaultVidDevice.id) {
     const name = String(data.defaultVidDevice.name || '');
-    // Zalo có thể gửi IR làm default; bỏ để lần gọi sau rơi về camera RGB.
     p.camera = isIrCamera(name) ? null : { id: String(data.defaultVidDevice.id), label: name };
   }
   savePrefs();
@@ -322,6 +324,19 @@ function ensureWindow() {
   win.on('focus', () => {
     clearTimeout(blurTimer);
   });
+  let boundsTimer = null;
+  const saveVideoBounds = () => {
+    if (!win || win.isDestroyed() || !videoMode || compact) return;
+    clearTimeout(boundsTimer);
+    boundsTimer = setTimeout(() => {
+      if (!win || win.isDestroyed() || !videoMode || compact) return;
+      const p = loadPrefs();
+      p.videoBounds = win.getContentBounds();
+      savePrefs();
+    }, 300);
+  };
+  win.on('resize', saveVideoBounds);
+  win.on('move', saveVideoBounds);
   win.on('closed', () => {
     const self = win;
     win = null; winReady = false; videoMode = false; compact = null; compacting = false; sharingScreen = false; clearTimeout(blurTimer);
@@ -353,7 +368,19 @@ function enterVideoMode() {
     compact = { x: Math.round(compact.x + (compact.width - VIDEO_WIDTH) / 2), y: Math.round(compact.y + (compact.height - VIDEO_HEIGHT) / 2), width: VIDEO_WIDTH, height: VIDEO_HEIGHT };
     return;
   }
-  setContent(VIDEO_WIDTH, VIDEO_HEIGHT);
+  const saved = loadPrefs().videoBounds;
+  let restored = false;
+  if (saved && [saved.x, saved.y, saved.width, saved.height].every(Number.isFinite)) {
+    try {
+      const { screen } = require('electron');
+      restored = screen.getAllDisplays().some((d) => {
+        const a = d.workArea;
+        return saved.x < a.x + a.width && saved.x + saved.width > a.x && saved.y < a.y + a.height && saved.y + saved.height > a.y;
+      });
+    } catch (_) { restored = false; }
+    if (restored) setBounds(saved);
+  }
+  if (!restored) setContent(VIDEO_WIDTH, VIDEO_HEIGHT);
   applySizing();
 }
 

@@ -33,7 +33,7 @@ PY
 python3 - "$DIR" "$HERE" <<'PY'
 import pathlib, sys
 d, here = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-for name, block in [('main.js', 'privacy-main.js'), ('main.js', 'setup-main.js'), ('preload-render.js', 'privacy-preload.js'), ('preload-render.js', 'setup-preload.js')]:
+for name, block in [('main.js', 'privacy-main.js'), ('main.js', 'setup-main.js'), ('preload-render.js', 'privacy-preload.js'), ('preload-render.js', 'setup-preload.js'), ('preload-noti.js', 'preload-noti.js')]:
     p = d / 'app' / 'main-dist' / name
     s = p.read_text(errors='ignore')
     b = (here / block).read_text()

@@ -9,6 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20x86__64-lightgrey.svg)](#môi-trường-đã-test)
 [![Zalo](https://img.shields.io/badge/Zalo-26.10.20-0068ff.svg)](VERSION)
+[![Website](https://img.shields.io/badge/Website-todo--laterx.github.io%2Fzalux-0a84ff.svg)](https://todo-laterx.github.io/zalux/)
 
 <sub>Unofficial Zalo desktop for Linux. Official macOS client, native call engine, no Wine.</sub>
 
@@ -63,7 +64,8 @@ Mục tiêu không phải là một “bản mod” thật nhiều tính năng, 
 ## Môi trường đã test
 
 - Ubuntu 26.04, GNOME Wayland + X11, Electron 22.3.27.
-- Zalo 26.10.20 (macOS client), `zcall-native` voice/video/group.
+- Zalo 26.10.20 (macOS client), `zcall-native`.
+- **Call điện thoại, call video và call nhóm đã test trên Ubuntu 26.04** (voice/video, có/không camera).
 - Chat, file, ảnh, sticker, reaction, ghim; ZaSetup; đổi chuông/thông báo.
 - Không test: ARM64, KDE/Fedora runtime, OCR (bản build bỏ OCR vì cần Windows installer).
 
@@ -130,16 +132,23 @@ zalux/
 ├── packaging/        deb + rpm
 ├── scripts/          bootstrap, install-latest, update, check-update, build-from-dmg, uninstall
 ├── docs/             dependencies, packaging
-├── assets/           icon, screenshot, donate QR
+├── assets/           icon, screenshots, donate QR
+├── site/             landing page (GitHub Pages)
 ├── .github/          CI
 ├── README.md  LICENSE  NOTICE  TRADEMARK.md  SECURITY.md  CHANGELOG.md
 └── VERSION
 ```
 
+## Website
+
+Landing page nằm trong `site/`; GitHub Actions `pages.yml` deploy lên GitHub Pages khi repo public.
+Xem local: mở `site/index.html`.
+
 ## Ảnh
 
 <p align="center">
-  <img src="assets/setup.png" width="560" alt="ZaSetup - quyền riêng tư và âm thanh">
+  <img src="assets/setup-privacy.png" width="420" alt="ZaSetup - quyền riêng tư">
+  <img src="assets/setup.png" width="420" alt="ZaSetup - âm thanh">
 </p>
 
 ## Chia sẻ
@@ -167,7 +176,7 @@ Không bắt buộc. Chỉ cần bạn dùng và thấy nó đỡ vướng là �
 
 ## Ghi công & pháp lý
 
-- Toolchain repack: [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux) (MIT).
+- Toolchain repack: [VN-Linux-Family/zalo-for-linux](https://github.com/VN-Linux-Family/zalo-for-linux) (MIT) — dùng script/nativelibs/zcall-native của upstream để chuyển **DMG macOS official** sang Linux; không dùng AppImage đóng gói sẵn của họ.
 - Âm thanh mặc định: Mixkit Free License.
 - Zalo, logo và tài sản liên quan thuộc VNG Corporation / Zalo.
 - Zalux **không phải** sản phẩm chính thức của Zalo/VNG. Dùng cho mục đích cá nhân;
