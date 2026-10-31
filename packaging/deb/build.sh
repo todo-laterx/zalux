@@ -11,6 +11,7 @@ mv squashfs-root/* .
 rm -rf squashfs-root
 cp -a "$R/patches" "$ROOT/opt/zalux/patches"
 "$ROOT/opt/zalux/patches/apply.sh" "$ROOT/opt/zalux" >/dev/null
+rm -f "$ROOT/opt/zalux/resources/app.asar.orig"
 cat > "$ROOT/usr/bin/zalux" <<'WRAP'
 #!/bin/sh
 P=/opt/zalux/patches

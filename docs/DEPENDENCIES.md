@@ -32,6 +32,10 @@ libssl-dev liblzma-dev python3
 ```
 (`npm run main` tải Electron 22 + DMG official; lần đầu cần internet.)
 
+## Installer / deb / rpm
+Chỉ cần `python3`, `curl`, `git`, `7z` (nếu tự extract), **không cần Node/npm**.
+Patch `app.asar` dùng `patches/asar.py` (thuần Python).
+
 ## Ghi chú
 - AppImage chạy trực tiếp cần FUSE (`libfuse2`/`fuse-libs`); bản cài bằng `installer/install.sh` hoặc deb/rpm **extract AppDir** nên không cần FUSE.
 - `--no-sandbox` dùng vì `chrome-sandbox` không setuid trong AppImage; nếu muốn sandbox, `chown root:root chrome-sandbox && chmod 4755`.

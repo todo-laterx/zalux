@@ -96,6 +96,7 @@ curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/boot
 ```
 
 Script tải repo, tải AppImage Original mới nhất từ upstream, áp patch, cài vào `~/.local` và tạo desktop entry.
+Installer chỉ cần `python3`, `curl`, `git` — **không cần Node/npm**; patch `app.asar` dùng `patches/asar.py`.
 
 ### Cách 1: clone + installer
 
