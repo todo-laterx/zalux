@@ -36,4 +36,4 @@ modules:
         dest-filename: Zalo.AppImage
       - type: git
         url: https://github.com/todo-laterx/zalux.git
-        tag: 26.10.20
+        commit: 569f7e130bdb925ea047ea90ce94d9fae6e7759e

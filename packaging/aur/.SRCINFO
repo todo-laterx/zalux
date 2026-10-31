@@ -21,7 +21,7 @@ pkgbase = zalux-bin
 	options = !strip
 	source = zalux-bin-26.10.20.AppImage::https://github.com/todo-laterx/zalux/releases/download/26.10.20/Zalux-26.10.20-x86_64.AppImage
 	sha256sums = d24ac5311836983a25df12c7c72f5d059c36ca032cbecc6882da8f2a03c325bf
-	source = zalux::git+https://github.com/todo-laterx/zalux.git#tag=26.10.20
+	source = zalux::git+https://github.com/todo-laterx/zalux.git#commit=569f7e130bdb925ea047ea90ce94d9fae6e7759e
 	sha256sums = SKIP
 
 pkgname = zalux-bin
