@@ -1,0 +1,54 @@
+# Maintainer: Zalux <tuannt.ovi@gmail.com>
+pkgname=zalux-bin
+pkgver=26.10.20
+pkgrel=1
+pkgdesc='Unofficial Zalo desktop for Linux (macOS client, native call engine)'
+arch=('x86_64')
+url='https://github.com/todo-laterx/zalux'
+license=('MIT')
+depends=('python' 'opus' 'libpulse' 'gtk3' 'nss' 'libx11' 'libxcb' 'mesa' 'alsa-lib' 'libsecret' 'xdg-utils')
+provides=('zalux')
+conflicts=('zalux')
+options=('!strip')
+source=("zalux-bin-$pkgver.AppImage::https://github.com/VN-Linux-Family/zalo-for-linux/releases/download/26.10.20/Zalo-26.10.20-Original-12ef36d-x86_64.AppImage"
+        "zalux::git+https://github.com/todo-laterx/zalux.git#tag=26.10.20")
+sha256sums=('2c807dd71c593120a3d1fac16085d788cc150980fba738e648afa681625bab64'
+            'SKIP')
+
+package() {
+  cd "$srcdir"
+  ./zalux-bin-$pkgver.AppImage --appimage-extract >/dev/null
+  install -d "$pkgdir/opt/zalux"
+  cp -a squashfs-root/. "$pkgdir/opt/zalux/"
+  rm -rf "$pkgdir/opt/zalux/squashfs-root"
+
+  install -d "$pkgdir/opt/zalux/patches"
+  cp -a "$srcdir/zalux/patches/." "$pkgdir/opt/zalux/patches/"
+  ZALUX_PACKAGE=1 "$pkgdir/opt/zalux/patches/apply.sh" "$pkgdir/opt/zalux" >/dev/null
+  rm -f "$pkgdir/opt/zalux/resources/app.asar.orig"
+
+  install -Dm644 "$srcdir/zalux/assets/zalux.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/zalux.png"
+  install -d "$pkgdir/usr/share/applications"
+  cat > "$pkgdir/usr/share/applications/zalux.desktop" <<'DESK'
+[Desktop Entry]
+Name=Zalux
+Comment=Zalux - Zalo Linux
+Exec=/usr/bin/zalux
+Icon=zalux
+Terminal=false
+Type=Application
+StartupWMClass=zalo
+Categories=Network;InstantMessaging;Chat;
+MimeType=x-scheme-handler/zalo;
+DESK
+  install -d "$pkgdir/usr/bin"
+  cat > "$pkgdir/usr/bin/zalux" <<'WRAP'
+#!/bin/sh
+P=/opt/zalux/patches
+if [ -f "$P/install-userscripts.py" ]; then python3 "$P/install-userscripts.py" >/dev/null 2>&1 || true; fi
+mkdir -p "$HOME/.local/share/zalo-linux/sounds"
+cp -n "$P/sounds/"*.mp3 "$HOME/.local/share/zalo-linux/sounds/" 2>/dev/null || true
+exec /usr/bin/env -u ELECTRON_RUN_AS_NODE /opt/zalux/zalo --no-sandbox --enable-gpu-rasterization --enable-zero-copy --disable-crash-reporter --js-flags=--max-old-space-size=768 "$@"
+WRAP
+  chmod 755 "$pkgdir/usr/bin/zalux"
+}

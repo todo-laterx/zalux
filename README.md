@@ -140,7 +140,7 @@ Mỗi bản update đều được áp lại bộ patch trong `patches/`; dữ l
 zalux/
 ├── installer/        install.sh, wrapper, desktop entry
 ├── patches/          asar/preload/main patches, ZaSetup, sounds, apply.sh
-├── packaging/        deb + rpm
+├── packaging/        deb + rpm + AUR + Flatpak
 ├── scripts/          bootstrap, install-latest, update, check-update, build-from-dmg, uninstall
 ├── docs/             dependencies, packaging
 ├── assets/           icon, screenshots, donate QR

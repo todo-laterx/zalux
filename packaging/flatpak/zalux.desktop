@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Zalux
+Comment=Zalux - Zalo Linux
+Exec=zalux
+Icon=zalux
+Terminal=false
+Type=Application
+StartupWMClass=zalo
+Categories=Network;InstantMessaging;Chat;
+MimeType=x-scheme-handler/zalo;

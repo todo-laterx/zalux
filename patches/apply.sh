@@ -62,9 +62,11 @@ if old in s:
     p.write_text(s.replace(old, new))
 PY2
 
-python3 "$HERE/install-userscripts.py" >/dev/null
-# copy default sounds for a fresh install
-mkdir -p "$HOME/.local/share/zalo-linux/sounds"
-cp -n "$HERE/sounds/"*.mp3 "$HOME/.local/share/zalo-linux/sounds/" 2>/dev/null || true
+if [ "${ZALUX_PACKAGE:-0}" != "1" ]; then
+  python3 "$HERE/install-userscripts.py" >/dev/null
+  # copy default sounds for a fresh install
+  mkdir -p "$HOME/.local/share/zalo-linux/sounds"
+  cp -n "$HERE/sounds/"*.mp3 "$HOME/.local/share/zalo-linux/sounds/" 2>/dev/null || true
+fi
 
 echo "patched $DIR"

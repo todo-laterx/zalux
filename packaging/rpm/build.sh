@@ -11,7 +11,7 @@ cd "$WORK/app"
 mv squashfs-root/* .
 rm -rf squashfs-root
 cp -a "$R/patches" "$WORK/patches"
-"$WORK/patches/apply.sh" "$WORK/app" >/dev/null
+ZALUX_PACKAGE=1 "$WORK/patches/apply.sh" "$WORK/app" >/dev/null
 rm -f "$WORK/app/resources/app.asar.orig"
 cp "$R/assets/zalux.png" "$WORK/zalux.png"
 tar -czf "$WORK/zalux-payload.tar.gz" -C "$WORK" app patches

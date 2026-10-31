@@ -1,0 +1,27 @@
+pkgbase = zalux-bin
+	pkgdesc = Unofficial Zalo desktop for Linux (macOS client, native call engine)
+	pkgver = 26.10.20
+	pkgrel = 1
+	url = https://github.com/todo-laterx/zalux
+	arch = x86_64
+	license = MIT
+	depends = python
+	depends = opus
+	depends = libpulse
+	depends = gtk3
+	depends = nss
+	depends = libx11
+	depends = libxcb
+	depends = mesa
+	depends = alsa-lib
+	depends = libsecret
+	depends = xdg-utils
+	provides = zalux
+	conflicts = zalux
+	options = !strip
+	source = zalux-bin-26.10.20.AppImage::https://github.com/VN-Linux-Family/zalo-for-linux/releases/download/26.10.20/Zalo-26.10.20-Original-12ef36d-x86_64.AppImage
+	sha256sums = 2c807dd71c593120a3d1fac16085d788cc150980fba738e648afa681625bab64
+	source = zalux::git+https://github.com/todo-laterx/zalux.git#tag=26.10.20
+	sha256sums = SKIP
+
+pkgname = zalux-bin
