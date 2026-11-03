@@ -14,13 +14,13 @@
 [![Engine](https://img.shields.io/badge/Engine-100%25%20Rust%20Clean--Room-dea584.svg)](#hiệu-năng-rust--tài-nguyên-thực-tế)
 [![Website](https://img.shields.io/badge/Website-todo--laterx.github.io%2Fzalux-0a84ff.svg)](https://todo-laterx.github.io/zalux/)
 
-<sub>Unofficial Zalo desktop for Linux. Official macOS client UI powered by an independent, in-house Rust VoIP/SFU Call Engine &amp; 9 Linux N-API native modules.</sub>
+<sub>Unofficial Zalo desktop for Linux. Independent client powered by an in-house Rust VoIP/SFU Call Engine &amp; 9 Linux N-API native modules.</sub>
 
 </div>
 
 ## Giới thiệu
 
-**Zalux** đưa giao diện client Zalo macOS chính thức chạy trực tiếp trên Linux Electron kết hợp cùng **Call Engine 1:1 / Nhóm và 9 module hệ thống viết mới hoàn toàn từ đầu bằng Rust (`zcall-engine`, `zalo-asar` và 9 N-API `.node` addons)**.
+**Zalux** đưa trải nghiệm Zalo quen thuộc chạy trực tiếp trên Linux Electron kết hợp cùng **Call Engine 1:1 / Nhóm và 9 module hệ thống viết mới hoàn toàn từ đầu bằng Rust (`zcall-engine`, `zalo-asar` và 9 N-API `.node` addons)**.
 
 > **Kiến trúc Độc lập (100% In-House Clean-Room):** Toàn bộ tầng xử lý cuộc gọi 1:1 & nhóm (`zcall-engine`), chia sẻ màn hình `PipeWire`/`OpenH264`, trình đóng gói `zalo-asar`, 9 thư viện `.node` biên dịch cho Linux, bộ công cụ vá bundle Python và giao diện `plugins/{zcall,zalux}` đều được tự thiết kế và viết riêng từ đầu — **hoàn toàn không phụ thuộc, không kế thừa và không sử dụng bất kỳ mã nguồn/userscript MIT của dự án cộng đồng bên thứ ba nào**.
 
@@ -122,9 +122,9 @@ cd zalux
 ~/.local/bin/zalux
 ```
 
-### Cách 3: Tự đóng gói sạch trực tiếp từ DMG macOS chính thức
+### Cách 3: Tự đóng gói sạch trực tiếp từ file DMG gốc của Zalo
 
-Repo **không chứa bộ cài `.dmg` hay gói `app.asar` độc quyền của Zalo**. Bạn có thể tự tái tạo gói cài đặt từ file DMG chính thức của Zalo chỉ với `7z`, `python3`, `curl`, `unzip` (không cần cài Node.js hay trình biên dịch Rust):
+Repo **không chứa bộ cài `.dmg` hay gói `app.asar` độc quyền của Zalo**. Bạn có thể tự tái tạo gói cài đặt từ file DMG tải từ trang chủ Zalo chỉ với `7z`, `python3`, `curl`, `unzip` (không cần cài Node.js hay trình biên dịch Rust):
 
 ```bash
 ./scripts/build-from-dmg.sh 26.10.20
@@ -158,7 +158,7 @@ zalux/
 ├── scripts/          build-from-dmg, bootstrap, install-latest, update, check-update, uninstall
 ├── docs/             Tài liệu phụ thuộc hệ thống & quy trình đóng gói
 ├── assets/           Biểu tượng Zalux & bộ ảnh/GIF thực tế giao diện Call + Cài đặt
-├── site/             Trang giới thiệu chính thức (GitHub Pages)
+├── site/             Trang web giới thiệu (GitHub Pages)
 └── README.md  LICENSE  NOTICE  TRADEMARK.md  SECURITY.md  CHANGELOG.md  VERSION
 ```
 
