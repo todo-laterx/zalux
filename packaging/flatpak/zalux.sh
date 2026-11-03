@@ -1,6 +1,7 @@
 #!/bin/sh
-P=/app/zalux/patches
-if [ -f "$P/install-userscripts.py" ]; then python3 "$P/install-userscripts.py" >/dev/null 2>&1 || true; fi
-mkdir -p "$HOME/.local/share/zalo-linux/sounds"
-cp -n "$P/sounds/"*.mp3 "$HOME/.local/share/zalo-linux/sounds/" 2>/dev/null || true
-exec /usr/bin/env -u ELECTRON_RUN_AS_NODE /app/zalux/zalo --no-sandbox --enable-gpu-rasterization --enable-zero-copy --disable-crash-reporter --js-flags=--max-old-space-size=768 "$@"
+if [ -n "${DISPLAY:-}" ] && [ "${ZALUX_WAYLAND_NATIVE:-0}" != "1" ]; then
+  set -- --ozone-platform=x11 --enable-features=JXL,WebRTCPipeWireCapturer "$@"
+else
+  set -- --ozone-platform=wayland --enable-features=JXL,WaylandWindowDecorations,WebRTCPipeWireCapturer "$@"
+fi
+exec /usr/bin/env -u ELECTRON_RUN_AS_NODE /app/zalux/zalo --no-sandbox --disable-crash-reporter --disable-gpu-memory-buffer-video-frames "$@"

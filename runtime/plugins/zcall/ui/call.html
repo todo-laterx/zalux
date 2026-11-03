@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zalux Call</title>
+  <link rel="stylesheet" href="call.css">
+</head>
+<body class="phase-idle voice">
+  <div id="app">
+    <header class="titlebar" id="titlebar">
+      <div class="brand">
+        <img id="brandIcon" alt="">
+        <span id="windowTitle">Zalux Call</span>
+        <span class="title-status" id="titleStatus"></span>
+      </div>
+      <div class="window-actions">
+        <button class="winbtn" id="btnCompact" title="Thu gọn cửa sổ nổi" aria-label="Thu gọn cửa sổ nổi">
+          <span class="win-icon" data-svg="compact"></span>
+        </button>
+        <button class="winbtn" id="btnFullscreen" title="Toàn màn hình" aria-label="Toàn màn hình">
+          <span class="win-icon" data-svg="fullscreen"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <div class="peer">
+        <canvas id="peerBackdrop" width="32" height="18" aria-hidden="true"></canvas>
+        <canvas id="peerVideo" width="640" height="360"></canvas>
+        <div class="peer-fallback" id="peerFallback">
+          <div class="avatar-ring">
+            <img id="peerAvatar" alt="">
+          </div>
+          <div class="peer-cam-off hidden" id="peerCamOff">
+            <span class="badge-icon" data-svg="camera_off"></span>
+            <span>Camera đang tắt</span>
+          </div>
+        </div>
+        <div class="group-grid hidden" id="groupGrid"></div>
+        <button class="group-view-toggle hidden" id="btnGroupView" type="button" title="Chuyển Gallery / Người nói"></button>
+        <div class="group-pager hidden" id="groupPager">
+          <button type="button" id="btnPagePrev" aria-label="Trang trước">‹</button>
+          <span class="page-label" id="pageLabel">1/1</span>
+          <button type="button" id="btnPageNext" aria-label="Trang sau">›</button>
+        </div>
+        <div class="peer-status-bar">
+          <div class="peer-mic-off hidden" id="peerMicOff">
+            <span class="badge-icon" data-svg="mic_off"></span>
+            <span id="peerMicOffText">Đối phương đang tắt mic</span>
+          </div>
+          <div class="speaking-badge hidden" id="speakingBadge">Đang nói</div>
+        </div>
+      </div>
+      <div class="self-pip hidden" id="selfPip">
+        <video id="selfVideo" muted autoplay playsinline></video>
+      </div>
+    </main>
+
+    <section class="info">
+      <h1 id="peerName">Zalux</h1>
+      <p id="phaseText">Đang chờ cuộc gọi…</p>
+      <div class="timer hidden" id="timer">00:00</div>
+    </section>
+
+    <footer class="controls" id="controls">
+      <button class="ctrl" id="btnMic" title="Tắt/bật micro">
+        <span class="ctrl-icon" data-svg="mic"></span>
+        <span class="ctrl-label">Micro</span>
+        <span class="meter"><i id="micMeter"></i></span>
+      </button>
+      <button class="ctrl" id="btnSpeaker" title="Loa">
+        <span class="ctrl-icon" data-svg="speaker"></span>
+        <span class="ctrl-label">Loa</span>
+      </button>
+      <button class="ctrl" id="btnCamera" title="Camera">
+        <span class="ctrl-icon" data-svg="camera"></span>
+        <span class="ctrl-label">Camera</span>
+      </button>
+      <button class="ctrl" id="btnScreen" title="Chia sẻ màn hình">
+        <span class="ctrl-icon" data-svg="screen"></span>
+        <span class="ctrl-label">Màn hình</span>
+      </button>
+      <button class="ctrl" id="btnMembers" title="Danh sách thành viên">
+        <span class="ctrl-icon zfa zfa-member"></span>
+        <span class="ctrl-label">Thành viên</span>
+      </button>
+      <button class="ctrl" id="btnDevices" title="Thiết bị">
+        <span class="ctrl-icon" data-svg="settings"></span>
+        <span class="ctrl-label">Thiết bị</span>
+      </button>
+      <button class="ctrl danger" id="btnHangup" title="Kết thúc">
+        <span class="ctrl-icon" data-svg="hangup"></span>
+        <span class="ctrl-label">Kết thúc</span>
+      </button>
+    </footer>
+
+    <div class="members-pop" id="membersPop" hidden>
+      <div class="members-pop-head">
+        <div class="members-pop-title">
+          <strong id="membersTitle">Thành viên</strong>
+          <span class="members-count" id="membersCount">0</span>
+        </div>
+        <button class="members-close" id="membersClose" title="Đóng" aria-label="Đóng">×</button>
+      </div>
+      <div class="members-list" id="membersList"></div>
+      <div class="members-add-view" id="membersAddView" hidden>
+        <div class="members-add-head">
+          <button class="members-back" id="membersBack" title="Quay lại">‹</button>
+          <input class="members-search" id="membersSearch" type="search" placeholder="Tìm thành viên…" autocomplete="off">
+          <span class="members-picked" id="membersPicked">0</span>
+        </div>
+        <div class="members-list" id="friendsList"></div>
+        <button class="members-invite" id="membersInvite">Mời vào cuộc gọi</button>
+      </div>
+      <button class="members-add" id="membersAdd">
+        <span class="members-add-ic zfa zfa-add-member" aria-hidden="true"></span>
+        <span id="membersAddLabel">Thêm thành viên</span>
+      </button>
+    </div>
+
+    <div class="device-menu hidden" id="deviceMenu">
+      <div class="device-head">
+        <span>Thiết bị</span>
+        <button id="btnMenuClose" title="Đóng" aria-label="Đóng">×</button>
+      </div>
+      <div class="device-section">
+        <h3>Micro</h3>
+        <div class="mic-volume" id="micVolumeRow">
+          <div class="mic-volume-head">
+            <span>Âm lượng micro</span>
+            <span id="micVolumeValue">100%</span>
+          </div>
+          <input id="micVolume" type="range" min="0" max="100" step="1" value="100"
+                 aria-label="Âm lượng micro">
+        </div>
+        <div id="micList"></div>
+      </div>
+      <div class="device-section"><h3>Loa</h3><div id="speakerList"></div></div>
+      <div class="device-section"><h3>Camera</h3><div id="cameraList"></div></div>
+    </div>
+
+    <div class="screen-picker hidden" id="screenPicker" role="dialog" aria-modal="true" aria-label="Chọn màn hình chia sẻ">
+      <div class="screen-picker-box">
+        <div class="screen-picker-head">
+          <span>Chọn màn hình để chia sẻ</span>
+          <button id="btnScreenPickerClose" title="Đóng" aria-label="Đóng">×</button>
+        </div>
+        <div class="screen-picker-list" id="screenPickerList"></div>
+      </div>
+    </div>
+
+    <div class="toast hidden" id="toast"></div>
+  </div>
+
+  <script src="assets.js"></script>
+  <script src="group-layout.js"></script>
+  <script src="call.js"></script>
+</body>
+</html>

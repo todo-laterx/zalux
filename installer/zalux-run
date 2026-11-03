@@ -1,13 +1,47 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 DIR="$HOME/.local/opt/zalux"
 APP="$DIR/app/zalo"
 if [ ! -x "$APP" ]; then
-  echo "Zalux chưa cài. Chạy installer/install.sh <AppImage>." >&2
+  echo "Zalux chưa cài đặt. Chạy ./installer/install.sh <Zalux.AppImage | AppDir>." >&2
   exit 1
 fi
-# Per-user setup: sounds + ZaSetup userscript (idempotent).
-PATCHES="$DIR/patches"
-if [ -f "$PATCHES/install-userscripts.py" ]; then python3 "$PATCHES/install-userscripts.py" >/dev/null 2>&1 || true; fi
-if [ -d "$PATCHES/sounds" ]; then mkdir -p "$HOME/.local/share/zalo-linux/sounds"; cp -n "$PATCHES/sounds/"*.mp3 "$HOME/.local/share/zalo-linux/sounds/" 2>/dev/null || true; fi
-exec /usr/bin/env -u ELECTRON_RUN_AS_NODE "$APP" --no-sandbox --enable-gpu-rasterization --enable-zero-copy --disable-crash-reporter --js-flags=--max-old-space-size=768 "$@"
+DESKTOP_FILE="$HOME/.local/share/applications/zalux.desktop"
+
+# Hộp thoại GTK + khung Wayland fallback theo theme hệ thống. Khung XWayland
+# (mặc định) do GNOME vẽ và được main-enhancements set `_GTK_THEME_VARIANT`.
+if [ -z "${GTK_THEME:-}" ] && command -v gsettings >/dev/null 2>&1; then
+  case "$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || true)" in
+    *dark*)
+      _theme="$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'" || true)"
+      [ -n "$_theme" ] && export GTK_THEME="$_theme"
+      ;;
+  esac
+fi
+
+# Backend cửa sổ: mặc định XWayland (X11). Electron 22 Wayland-native có lỗi
+# hide()→show() làm compositor kill app (`gtk_shell::get_gtk_surface already
+# requested`), không raise được cửa sổ khi bấm icon và vẽ nút close bên trái
+# (bỏ qua button-layout của distro). Chỉ dùng Wayland-native khi không có XWayland.
+# Đặt ZALUX_WAYLAND_NATIVE=1 để buộc chạy Wayland-native (thử nghiệm).
+if [ -n "${DISPLAY:-}" ] && [ "${ZALUX_WAYLAND_NATIVE:-0}" != "1" ]; then
+  WINDOW_ARGS=(--ozone-platform=x11 --enable-features=JXL,WebRTCPipeWireCapturer)
+else
+  WINDOW_ARGS=(--ozone-platform=wayland --enable-features=JXL,WaylandWindowDecorations,WebRTCPipeWireCapturer)
+fi
+
+exec /usr/bin/env \
+  -u ELECTRON_RUN_AS_NODE \
+  -u GIO_LAUNCHED_DESKTOP_FILE \
+  -u GIO_LAUNCHED_DESKTOP_FILE_PID \
+  -u SNAP \
+  -u SNAP_NAME \
+  -u SNAP_APP_DESKTOP_FILE \
+  CHROME_DESKTOP=zalux.desktop \
+  BAMF_DESKTOP_FILE_HINT="$DESKTOP_FILE" \
+  "$APP" \
+  --no-sandbox \
+  --disable-crash-reporter \
+  --disable-gpu-memory-buffer-video-frames \
+  "${WINDOW_ARGS[@]}" \
+  "$@"

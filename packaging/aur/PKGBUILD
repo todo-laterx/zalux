@@ -1,55 +1,60 @@
-# Maintainer: Zalux <tuannt.ovi@gmail.com>
+# Maintainer: Zalux Contributors <https://github.com/todo-laterx/zalux>
 pkgname=zalux-bin
 pkgver=26.10.20
 pkgrel=1
-pkgdesc='Unofficial Zalo desktop for Linux (macOS client, native call engine)'
+pkgdesc='Unofficial Zalo desktop for Linux (native Rust call engine & N-API modules)'
 arch=('x86_64')
 url='https://github.com/todo-laterx/zalux'
 license=('MIT')
-depends=('python' 'opus' 'libpulse' 'gtk3' 'nss' 'libx11' 'libxcb' 'mesa' 'alsa-lib' 'libsecret' 'xdg-utils')
+depends=('opus' 'libpulse' 'libpipewire' 'xdg-desktop-portal' 'ffmpeg' 'gtk3' 'nss' 'libx11' 'libxcb' 'mesa' 'alsa-lib' 'libsecret' 'xdg-utils')
 provides=('zalux')
 conflicts=('zalux')
 options=('!strip')
-source=("zalux-bin-$pkgver.AppImage::https://github.com/todo-laterx/zalux/releases/download/26.10.20/Zalux-26.10.20-x86_64.AppImage"
-        "zalux::git+https://github.com/todo-laterx/zalux.git#commit=569f7e130bdb925ea047ea90ce94d9fae6e7759e")
-sha256sums=('d24ac5311836983a25df12c7c72f5d059c36ca032cbecc6882da8f2a03c325bf'
+source=("zalux-bin-$pkgver.AppImage::https://github.com/todo-laterx/zalux/releases/download/${pkgver}/Zalux-${pkgver}-x86_64.AppImage"
+        "zalux::git+https://github.com/todo-laterx/zalux.git")
+sha256sums=('SKIP'
             'SKIP')
 
 package() {
   cd "$srcdir"
-  ./zalux-bin-$pkgver.AppImage --appimage-extract >/dev/null
+  chmod +x "./zalux-bin-$pkgver.AppImage"
+  "./zalux-bin-$pkgver.AppImage" --appimage-extract >/dev/null
   install -d "$pkgdir/opt/zalux"
   cp -a squashfs-root/. "$pkgdir/opt/zalux/"
   rm -rf "$pkgdir/opt/zalux/squashfs-root"
 
-  install -d "$pkgdir/opt/zalux/patches"
-  cp -a "$srcdir/zalux/patches/." "$pkgdir/opt/zalux/patches/"
-  ZALUX_PACKAGE=1 "$pkgdir/opt/zalux/patches/apply.sh" "$pkgdir/opt/zalux" >/dev/null
-  rm -f "$pkgdir/opt/zalux/resources/app.asar.orig"
-
   install -Dm644 "$srcdir/zalux/assets/zalux.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/zalux.png"
-  install -Dm644 "$srcdir/zalux/THIRD_PARTY_NOTICES.md" "$pkgdir/usr/share/doc/zalux/THIRD_PARTY_NOTICES.md"
+  install -Dm644 "$srcdir/zalux/NOTICE" "$pkgdir/usr/share/doc/zalux/NOTICE"
   install -d "$pkgdir/usr/share/applications"
   cat > "$pkgdir/usr/share/applications/zalux.desktop" <<'DESK'
 [Desktop Entry]
 Name=Zalux
-Comment=Zalux - Zalo Linux
-Exec=/usr/bin/zalux
+Comment=Zalux - Zalo Desktop for Linux
+Exec=/usr/bin/zalux %U
 Icon=zalux
 Terminal=false
 Type=Application
-StartupWMClass=zalo
+StartupWMClass=Zalo
 Categories=Network;InstantMessaging;Chat;
 MimeType=x-scheme-handler/zalo;
 DESK
   install -d "$pkgdir/usr/bin"
   cat > "$pkgdir/usr/bin/zalux" <<'WRAP'
 #!/bin/sh
-P=/opt/zalux/patches
-if [ -f "$P/install-userscripts.py" ]; then python3 "$P/install-userscripts.py" >/dev/null 2>&1 || true; fi
-mkdir -p "$HOME/.local/share/zalo-linux/sounds"
-cp -n "$P/sounds/"*.mp3 "$HOME/.local/share/zalo-linux/sounds/" 2>/dev/null || true
-exec /usr/bin/env -u ELECTRON_RUN_AS_NODE /opt/zalux/zalo --no-sandbox --enable-gpu-rasterization --enable-zero-copy --disable-crash-reporter --js-flags=--max-old-space-size=768 "$@"
+if [ -z "${GTK_THEME:-}" ] && command -v gsettings >/dev/null 2>&1; then
+  case "$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || true)" in
+    *dark*)
+      _theme="$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'" || true)"
+      [ -n "$_theme" ] && export GTK_THEME="$_theme"
+      ;;
+  esac
+fi
+if [ -n "${DISPLAY:-}" ] && [ "${ZALUX_WAYLAND_NATIVE:-0}" != "1" ]; then
+  set -- --ozone-platform=x11 --enable-features=JXL,WebRTCPipeWireCapturer "$@"
+else
+  set -- --ozone-platform=wayland --enable-features=JXL,WaylandWindowDecorations,WebRTCPipeWireCapturer "$@"
+fi
+exec /usr/bin/env -u ELECTRON_RUN_AS_NODE -u GIO_LAUNCHED_DESKTOP_FILE -u GIO_LAUNCHED_DESKTOP_FILE_PID -u SNAP -u SNAP_NAME -u SNAP_APP_DESKTOP_FILE CHROME_DESKTOP=zalux.desktop BAMF_DESKTOP_FILE_HINT=/usr/share/applications/zalux.desktop /opt/zalux/zalo --no-sandbox --disable-crash-reporter --disable-gpu-memory-buffer-video-frames "$@"
 WRAP
   chmod 755 "$pkgdir/usr/bin/zalux"
 }

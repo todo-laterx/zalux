@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zalux: cuộc gọi đến</title>
+  <link rel="stylesheet" href="incoming.css">
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="glow"></div>
+
+    <div class="top">
+      <span class="kind" id="kindText">Cuộc gọi thoại đến</span>
+      <button class="close" id="btnRejectTop" title="Từ chối" aria-label="Từ chối">×</button>
+    </div>
+
+    <div class="caller">
+      <div class="avatar-ring">
+        <img id="peerAvatar" alt="">
+      </div>
+      <h1 id="peerName">Zalux</h1>
+      <p id="peerText">Nhấn để trả lời</p>
+    </div>
+
+    <div class="actions">
+      <button class="action accept" id="btnAcceptAudio" title="Trả lời">
+        <span class="disc">
+          <img class="icon-img hidden" id="iconAcceptNoCam" alt="">
+          <svg id="svgAcceptPhone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </span>
+        <span class="label" id="labelAcceptAudio">Trả lời</span>
+      </button>
+
+      <button class="action accept hidden" id="btnAcceptVideo" title="Trả lời video">
+        <span class="disc">
+          <img class="icon-img hidden" id="iconAcceptVideo" alt="">
+          <svg id="svgAcceptVideo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="6" width="14" height="12" rx="2.5" ry="2.5"/>
+            <path d="M16 10.5l6-3.5v10l-6-3.5v-3z"/>
+          </svg>
+        </span>
+        <span class="label">Trả lời video</span>
+      </button>
+
+      <button class="action reject" id="btnReject" title="Từ chối">
+        <span class="disc">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 9c-3.9 0-7.43 1.44-10.14 3.81-.38.33-.42.9-.08 1.28l2.14 2.4c.31.35.84.4 1.21.12.88-.67 1.86-1.2 2.91-1.57.42-.15.7-.54.7-.99V11.6c1.05-.35 2.17-.54 3.26-.54s2.21.19 3.26.54v2.45c0 .45.28.84.7.99 1.05.37 2.03.9 2.91 1.57.37.28.9.23 1.21-.12l2.14-2.4c.34-.38.3-.95-.08-1.28C19.43 10.44 15.9 9 12 9z"/>
+          </svg>
+        </span>
+        <span class="label">Từ chối</span>
+      </button>
+    </div>
+  </div>
+
+  <script src="assets.js"></script>
+  <script src="incoming.js"></script>
+</body>
+</html>

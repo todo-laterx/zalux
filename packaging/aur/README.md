@@ -1,11 +1,10 @@
-# AUR
+# AUR (`zalux-bin`)
 
-`zalux-bin` đóng gói AppImage Original của upstream, áp patch Zalux, cài vào `/opt/zalux`.
-AUR yêu cầu tài khoản Arch/AUR để đẩy `PKGBUILD` + `.SRCINFO`.
+`zalux-bin` đóng gói bản phát hành AppImage của Zalux cài đặt vào `/opt/zalux`.
 
 ```bash
 makepkg --printsrcinfo > .SRCINFO
 makepkg -si
 ```
 
-Muốn cập nhật bản mới: đổi `pkgver`, URL AppImage, sha256, và commit hash trong `source`.
+Khi cập nhật phiên bản mới: cập nhật `pkgver` và `sha256sums` của gói AppImage phát hành.

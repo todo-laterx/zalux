@@ -1,14 +1,16 @@
-#!/bin/bash
-# Tải AppImage mới nhất từ Releases của Zalux rồi cài + patch.
-set -e
-R="$(cd "$(dirname "$0")/.." && pwd)"
-tag=$(curl -s https://api.github.com/repos/todo-laterx/zalux/releases/latest | python3 -c 'import json,sys;print(json.load(sys.stdin)["tag_name"])')
-url=$(curl -s https://api.github.com/repos/todo-laterx/zalux/releases/latest | python3 -c 'import json,sys
+#!/usr/bin/env bash
+# update.sh — Tải bản Zalux mới nhất từ Releases rồi cập nhật vào ~/.local.
+set -euo pipefail
+R="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+tag="$(curl -s https://api.github.com/repos/todo-laterx/zalux/releases/latest | python3 -c 'import json,sys;print(json.load(sys.stdin)["tag_name"])')"
+url="$(curl -s https://api.github.com/repos/todo-laterx/zalux/releases/latest | python3 -c 'import json,sys
 for a in json.load(sys.stdin).get("assets",[]):
   n=a["name"]
-  if n.startswith("Zalux-") and n.endswith("x86_64.AppImage"): print(a["browser_download_url"]); break')
-[ -n "$url" ] || { echo "Không thấy AppImage trong release" >&2; exit 1; }
-out="$R/dist/Zalux-$tag.AppImage"
+  if n.startswith("Zalux-") and n.endswith("x86_64.AppImage"):
+    print(a["browser_download_url"])
+    break')"
+[ -n "$url" ] || { echo "Không tìm thấy AppImage trong release" >&2; exit 1; }
+out="$R/dist/Zalux-$tag-x86_64.AppImage"
 mkdir -p "$R/dist"
 echo "Tải $url"
 curl -L --fail --max-time 900 -o "$out" "$url"

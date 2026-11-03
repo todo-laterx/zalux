@@ -9,6 +9,7 @@ finish-args:
   - --socket=wayland
   - --socket=fallback-x11
   - --socket=pulseaudio
+  - --filesystem=xdg-run/pipewire-0
   - --device=all
   - --filesystem=home
   - --talk-name=org.freedesktop.portal.Desktop
@@ -19,21 +20,17 @@ modules:
     buildsystem: simple
     build-commands:
       - install -d /app/zalux
-      - ./Zalo.AppImage --appimage-extract
+      - ./Zalux.AppImage --appimage-extract
       - cp -a squashfs-root/. /app/zalux/
       - rm -rf /app/zalux/squashfs-root
-      - cp -a patches/. /app/zalux/patches/
-      - ZALUX_PACKAGE=1 /app/zalux/patches/apply.sh /app/zalux
-      - rm -f /app/zalux/resources/app.asar.orig
       - install -Dm644 assets/zalux.png /app/share/icons/hicolor/512x512/apps/zalux.png
-      - install -Dm644 THIRD_PARTY_NOTICES.md /app/share/doc/zalux/THIRD_PARTY_NOTICES.md
+      - install -Dm644 NOTICE /app/share/doc/zalux/NOTICE
       - install -Dm644 packaging/flatpak/zalux.desktop /app/share/applications/zalux.desktop
       - install -Dm755 packaging/flatpak/zalux.sh /app/bin/zalux
     sources:
       - type: file
         url: https://github.com/todo-laterx/zalux/releases/download/26.10.20/Zalux-26.10.20-x86_64.AppImage
-        sha256: d24ac5311836983a25df12c7c72f5d059c36ca032cbecc6882da8f2a03c325bf
-        dest-filename: Zalo.AppImage
+        sha256: 0000000000000000000000000000000000000000000000000000000000000000
+        dest-filename: Zalux.AppImage
       - type: git
         url: https://github.com/todo-laterx/zalux.git
-        commit: 569f7e130bdb925ea047ea90ce94d9fae6e7759e

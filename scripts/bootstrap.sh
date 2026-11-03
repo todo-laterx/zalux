@@ -1,6 +1,6 @@
-#!/bin/bash
-# Cài Zalux một dòng: tải repo + AppImage upstream + patch + cài vào ~/.local.
-set -e
+#!/usr/bin/env bash
+# bootstrap.sh — Cài Zalux một dòng: tải repo + cài bản phát hành mới nhất vào ~/.local.
+set -euo pipefail
 SRC="$HOME/.local/share/zalux/src"
 rm -rf "$SRC"
 mkdir -p "$(dirname "$SRC")"
