@@ -2,12 +2,19 @@ Zalux is an independent, clean-room engineering project for running Zalo Desktop
 
 - 100% of Zalux's runtime, native libraries, patchers, and UI extensions (`zcall-engine` ZRTC 1:1 &
   Zavi SFU Group Call + PipeWire/OpenH264 ScreenCast, `zalo-asar`, 9 Linux N-API `.node` addons,
-  Python bundle patchers, and `runtime/plugins/{zcall,zalux}`) are written in-house from scratch,
+  Python bundle patchers, and `runtime/plugins/{zcall,zalux}`) are developed in-house from scratch,
   with zero code or dependency on any third-party community Zalo-for-Linux wrapper or userscript.
+- Distribution model:
+  * UI plugins (`runtime/plugins/`), Python bundle patchers (`runtime/toolchain/`), installer,
+    packaging scripts (`installer/`, `packaging/`, `scripts/`), and documentation/site are released
+    as open-source under the MIT License (see LICENSE).
+  * Native Rust binaries (`runtime/bin/zcall-engine`, `runtime/bin/zalo-asar`) and the 9 Linux
+    `x86_64` N-API addons (`runtime/nativelibs/*.node`) are distributed as prebuilt clean-room
+    binaries for security and protocol integrity, permitted for free use and redistribution as part
+    of Zalux.
 - Zalo client, trademarks, and proprietary assets belong to VNG Corporation / Zalo.
 - This repository does not redistribute the Zalo `.dmg` installer or extracted `app.asar` bundle
-  in its source tree; packages are assembled cleanly from the official macOS DMG.
+  in its source tree; packages can be assembled locally from the official Zalo DMG.
 - Zalux is not affiliated with, endorsed by, or sponsored by Zalo / VNG Corporation.
 - Bundled notification & ringtone sound samples (`runtime/plugins/zalux/sounds/`): Mixkit Free License.
 - Website self-hosted fonts (`site/fonts/`): Plus Jakarta Sans & JetBrains Mono (SIL Open Font License 1.1).
-- Zalux source code, native Rust runtime, UI plugins, and packaging tooling: MIT License (see LICENSE).

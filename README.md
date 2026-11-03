@@ -152,7 +152,7 @@ Xem chi tiết gói thư viện hệ thống (`libopus`, `libpipewire`, `xdg-des
 
 ```text
 zalux/
-├── runtime/          Rust binaries (zcall-engine, zalo-asar), 9 N-API .node, plugins/{zcall,zalux}, toolchain
+├── runtime/          Prebuilt Rust binaries (zcall-engine, zalo-asar, 9 N-API .node) + open-source plugins/{zcall,zalux} & toolchain
 ├── installer/        install.sh, zalux-run, zalux.desktop
 ├── packaging/        Kịch bản đóng gói deb, rpm, AUR, Flatpak
 ├── scripts/          build-from-dmg, bootstrap, install-latest, update, check-update, uninstall
@@ -185,5 +185,5 @@ zalux/
 
 - **Zalo** và các nhãn hiệu liên quan thuộc quyền sở hữu của VNG Corporation / Zalo.
 - **Zalux** là dự án kỹ thuật độc lập phục vụ tương thích hệ điều hành Linux; không liên kết, không được tài trợ hay chứng thực bởi Zalo / VNG.
-- Toàn bộ runtime Rust (`zcall-engine`, `zalo-asar`, 9 N-API `.node`), bộ công cụ vá và giao diện mở rộng của Zalux được tự phát triển độc lập, không phụ thuộc bất kỳ dự án cộng đồng bên thứ ba nào, phát hành theo giấy phép MIT (xem [LICENSE](LICENSE) và [NOTICE](NOTICE)).
-- Kho mã nguồn này không lưu trữ hay phân phối tệp `.dmg` / `.asar` của Zalo. Các mẫu âm thanh thông báo & nhạc chuông bổ sung đi kèm thuộc giấy phép [Mixkit Free License](https://mixkit.co/license/).
+- Toàn bộ hệ thống của Zalux được tự phát triển độc lập (100% clean-room), không phụ thuộc bất kỳ dự án cộng đồng bên thứ ba nào: tầng tích hợp giao diện (`runtime/plugins/`), bộ công cụ đóng gói (`runtime/toolchain/`, `scripts/`, `installer/`, `packaging/`) mở mã nguồn theo giấy phép **MIT**; bộ nhân thực thi Rust (`zcall-engine`, `zalo-asar` và 9 module N-API `.node` trong `runtime/`) được phân phối dưới dạng **Prebuilt Native Rust Binaries** biên dịch sẵn cho Linux `x86_64` nhằm bảo toàn tính toàn vẹn giao thức (xem [LICENSE](LICENSE) và [NOTICE](NOTICE)).
+- Kho mã nguồn này không lưu trữ tệp `.dmg` hay `.asar` của Zalo trong cây mã nguồn. Các mẫu âm thanh thông báo & nhạc chuông bổ sung đi kèm thuộc giấy phép [Mixkit Free License](https://mixkit.co/license/).

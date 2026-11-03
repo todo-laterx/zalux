@@ -4,6 +4,7 @@ SRC="${1:?usage: build.sh <Zalux.AppImage | AppDir> [version]}"
 VER="${2:-$(cat "$(dirname "$0")/../../VERSION")}"
 R="$(cd "$(dirname "$0")/../.." && pwd)"
 ROOT="$(mktemp -d)"
+chmod 0755 "$ROOT"
 trap 'rm -rf "$ROOT"' EXIT
 
 mkdir -p "$ROOT/opt/zalux" \

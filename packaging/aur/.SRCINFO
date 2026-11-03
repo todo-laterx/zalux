@@ -1,13 +1,15 @@
 pkgbase = zalux-bin
-	pkgdesc = Unofficial Zalo desktop for Linux (macOS client, native call engine)
+	pkgdesc = Unofficial Zalo desktop for Linux (native Rust call engine & N-API modules)
 	pkgver = 26.10.20
 	pkgrel = 1
 	url = https://github.com/todo-laterx/zalux
 	arch = x86_64
 	license = MIT
-	depends = python
 	depends = opus
 	depends = libpulse
+	depends = libpipewire
+	depends = xdg-desktop-portal
+	depends = ffmpeg
 	depends = gtk3
 	depends = nss
 	depends = libx11
@@ -20,8 +22,8 @@ pkgbase = zalux-bin
 	conflicts = zalux
 	options = !strip
 	source = zalux-bin-26.10.20.AppImage::https://github.com/todo-laterx/zalux/releases/download/26.10.20/Zalux-26.10.20-x86_64.AppImage
-	sha256sums = d24ac5311836983a25df12c7c72f5d059c36ca032cbecc6882da8f2a03c325bf
-	source = zalux::git+https://github.com/todo-laterx/zalux.git#commit=569f7e130bdb925ea047ea90ce94d9fae6e7759e
+	source = zalux::git+https://github.com/todo-laterx/zalux.git
+	sha256sums = SKIP
 	sha256sums = SKIP
 
 pkgname = zalux-bin
