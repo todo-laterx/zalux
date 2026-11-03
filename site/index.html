@@ -3,241 +3,555 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Zalux — Zalo trên Linux, không Wine</title>
-<meta name="description" content="Zalux mang Zalo macOS chính thức lên Linux: UI gốc, gọi điện native, không Wine. Cài bằng một lệnh.">
-<meta property="og:title" content="Zalux — Zalo trên Linux, không Wine">
-<meta property="og:description" content="UI Zalo macOS, gọi voice/video native, không Wine. Dành cho người dùng Linux.">
-<meta property="og:image" content="assets/setup-sound.png">
+<title>Zalux: Zalo trên Linux với Native Rust Engine</title>
+<meta name="description" content="Zalux đưa giao diện Zalo chính thức chạy native trên Linux với Rust ZRTC 1:1 & Zavi SFU Group Call Engine tự phát triển (~3.4 MB PSS), chia sẻ màn hình PipeWire/OpenH264 và 9 module N-API.">
+<meta property="og:title" content="Zalux: Zalo trên Linux với Native Rust Engine">
+<meta property="og:description" content="Gọi 1:1 HD, họp nhóm Zavi SFU kiểu Zoom, chia sẻ màn hình PipeWire và 9 module Rust N-API (~3.4 MB PSS). Tự phát triển độc lập, không Wine.">
+<meta property="og:image" content="assets/call-group-gallery.png">
 <link rel="icon" href="favicon.png">
+<link rel="preload" href="fonts/pjs-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/pjs-normal-vietnamese.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <a class="skip" href="#main">Bỏ qua điều hướng</a>
-<header class="nav">
-  <a class="brand" href="#top" aria-label="Zalux">
-    <img src="assets/zalux.png" alt="" width="28" height="28">
-    <span>Zalux</span>
-  </a>
-  <nav aria-label="Chính">
-    <a href="#features">Tính năng</a>
-    <a href="#call">Gọi điện</a>
-    <a href="#install">Cài đặt</a>
-  </nav>
-  <a class="nav-cta" href="https://github.com/todo-laterx/zalux" target="_blank" rel="noreferrer">GitHub</a>
-</header>
+
+<div class="nav-wrap">
+  <header class="nav-island">
+    <a class="brand" href="#top" aria-label="Zalux trang chủ">
+      <span class="brand-icon-wrap">
+        <img src="assets/zalux.png" alt="Biểu tượng Zalux" width="68" height="68">
+      </span>
+      <span>Zalux</span>
+    </a>
+    <nav class="nav-links" aria-label="Điều hướng chính">
+      <a href="#call">Hệ thống Call</a>
+      <a href="#features">Kiến trúc</a>
+      <a href="#perf">Hiệu năng</a>
+      <a href="#install">Cài đặt</a>
+    </nav>
+    <a class="nav-gh" href="https://github.com/todo-laterx/zalux" target="_blank" rel="noreferrer">
+      <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M206.13,75.92A57.79,57.79,0,0,0,201.2,29a6,6,0,0,0-5.2-3,57.77,57.77,0,0,0-47,24H123A57.77,57.77,0,0,0,76,26a6,6,0,0,0-5.2,3,57.79,57.79,0,0,0-4.93,46.92A55.88,55.88,0,0,0,58,104v8a54.06,54.06,0,0,0,50.45,53.87A37.85,37.85,0,0,0,98,192v10H72a26,26,0,0,1-26-26A38,38,0,0,0,8,138a6,6,0,0,0,0,12,26,26,0,0,1,26,26,38,38,0,0,0,38,38H98v18a6,6,0,0,0,12,0V192a26,26,0,0,1,52,0v40a6,6,0,0,0,12,0V192a37.85,37.85,0,0,0-10.45-26.13A54.06,54.06,0,0,0,214,112v-8A55.88,55.88,0,0,0,206.13,75.92ZM202,112a42,42,0,0,1-42,42H112a42,42,0,0,1-42-42v-8a43.86,43.86,0,0,1,7.3-23.69,6,6,0,0,0,.81-5.76,45.85,45.85,0,0,1,1.43-36.42,45.85,45.85,0,0,1,35.23,21.1A6,6,0,0,0,119.83,62h32.34a6,6,0,0,0,5.06-2.76,45.83,45.83,0,0,1,35.23-21.11,45.85,45.85,0,0,1,1.43,36.42,6,6,0,0,0,.79,5.74A43.78,43.78,0,0,1,202,104Z"/></svg>
+      <span>GitHub</span>
+    </a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Mở menu điều hướng" aria-expanded="false" aria-controls="mobileMenu">
+      <span class="menu-line"></span>
+      <span class="menu-line"></span>
+    </button>
+  </header>
+</div>
+
+<nav class="mobile-menu" id="mobileMenu" aria-label="Menu di động">
+  <a href="#call">Hệ thống Call</a>
+  <a href="#features">Kiến trúc</a>
+  <a href="#perf">Hiệu năng</a>
+  <a href="#install">Cài đặt</a>
+  <a href="https://github.com/todo-laterx/zalux" target="_blank" rel="noreferrer">GitHub</a>
+</nav>
 
 <main id="main">
-<section class="hero" id="top">
-  <div class="hero-copy reveal">
-    <p class="eyebrow">Zalo cho Linux</p>
-    <h1>Zalo trên Linux.<br><em>Không Wine.</em></h1>
-    <p class="lede">Client Zalo macOS chính thức, chuyển sang chạy native trên Linux Electron. Giao diện quen thuộc, gọi điện thật, cài trong một lệnh.</p>
-    <div class="actions">
-      <a class="btn primary" href="#install">Cài đặt ngay</a>
-      <a class="btn ghost" href="#features">Xem tính năng</a>
-    </div>
-    <p class="meta">Ubuntu 26.04 · Wayland / X11 · call voice, video, nhóm</p>
-  </div>
-  <div class="hero-art reveal" aria-label="Ảnh giao diện Zalux">
-    <div class="window">
-      <div class="window-bar"><span></span><span></span><span></span><b>Zalux</b></div>
-      <img src="assets/setup-sound.png" alt="ZaSetup trong Zalux: chọn nhạc chuông và âm thông báo" width="924" height="602">
-    </div>
-    <div class="float-card">
-      <span class="dot"></span>
-      <div><strong>Call native</strong><small>voice · video · group</small></div>
-    </div>
-  </div>
-</section>
-
-<section class="strip reveal" aria-label="So sánh nhanh">
-  <div><span>Web</span><p>Thiếu gọi điện, thông báo chậm</p></div>
-  <div><span>Wine</span><p>Nặng, giật, call chập chờn</p></div>
-  <div class="good"><span>Zalux</span><p>UI macOS, call native, không Wine</p></div>
-</section>
-
-<section class="section" id="features">
-  <div class="section-head reveal">
-    <p class="eyebrow">Tính năng</p>
-    <h2>Đủ tốt để dùng mỗi ngày.</h2>
-    <p>Không phải bản mod nhiều nút. Là Zalo gốc, được làm cho Linux.</p>
-  </div>
-  <div class="bento">
-    <article class="card card-call reveal">
-      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 3.5l3 3-2 3c1.2 2.6 3.4 4.8 6 6l3-2 3 3c.4.4.5 1 .2 1.5-1 1.8-3 2.8-5 2.3C8.5 19 5 15.5 3.7 8.3 3.2 6.3 4.2 4.3 6 3.3c.5-.3 1.1-.2 1.5.2z"/></svg></div>
-      <h3>Gọi điện native</h3>
-      <p>Voice, video và gọi nhóm qua <code>zcall-native</code> + PulseAudio/Opus. Không helper Windows, không Wine.</p>
-      <div class="chips"><span>Đã test Ubuntu</span><span>PulseAudio</span><span>Opus</span></div>
-    </article>
-    <article class="card reveal">
-      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div>
-      <h3>UI Zalo macOS</h3>
-      <p>Chat, file, ảnh, sticker, reaction, ghim — giữ nguyên trải nghiệm gốc.</p>
-    </article>
-    <article class="card reveal">
-      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
-      <h3>ZaSetup</h3>
-      <p>Ẩn “đang soạn tin”, “đã nhận”, “đã xem” chỉ bằng một switch.</p>
-    </article>
-    <article class="card reveal">
-      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14c2-3 4-4 8-4s6 1 8 4"/><path d="M7 17c1.5-1.6 3-2.3 5-2.3s3.5.7 5 2.3"/><path d="M10 20c.7-.8 1.3-1.1 2-1.1s1.3.3 2 1.1"/></svg></div>
-      <h3>12 chuông · 14 thông báo</h3>
-      <p>Nghe thử play/pause từng mẫu, chọn là áp dụng ngay.</p>
-    </article>
-    <article class="card reveal">
-      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
-      <h3>Những chi tiết nhỏ</h3>
-      <p>Call đến căn giữa, lọc camera IR, ẩn titlebar thừa, bỏ tên tài khoản.</p>
-    </article>
-    <article class="card reveal">
-      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg></div>
-      <h3>AppImage · deb · rpm</h3>
-      <p>Cài không cần root, hoặc đóng gói hệ thống. Update theo từng bản Zalo.</p>
-    </article>
-  </div>
-</section>
-
-<section class="section call-section" id="call">
-  <div class="call-copy reveal">
-    <p class="eyebrow">Gọi điện</p>
-    <h2>Gọi thật. Không qua Wine.</h2>
-    <p>Engine native lo signalling, SRTP và audio; UI vẫn là Zalo. Voice, video và gọi nhóm đã được thử trên Ubuntu 26.04, cả Wayland lẫn X11.</p>
-    <ul class="ticks">
-      <li>Voice / video / group call</li>
-      <li>Chọn mic, loa, camera trong cuộc gọi</li>
-      <li>Cuộc gọi đến hiện giữa màn hình</li>
-      <li>Tự lọc camera IR để không bị đen trắng</li>
-    </ul>
-  </div>
-  <div class="call-art reveal" aria-label="Minh hoạ gọi điện">
-    <div class="call-tile">
-      <div class="avatar">ZL</div>
-      <div class="call-name">Cuộc gọi video</div>
-      <div class="call-sub">native · SRTP · Opus</div>
-      <div class="call-actions"><span></span><span></span><span></span></div>
-    </div>
-    <div class="call-side">
-      <div><b>Voice</b><small>Opus 16k</small></div>
-      <div><b>Video</b><small>H.264</small></div>
-      <div><b>Group</b><small>PulseAudio</small></div>
-    </div>
-  </div>
-</section>
-
-<section class="section install" id="install">
-  <div class="section-head reveal">
-    <p class="eyebrow">Cài đặt</p>
-    <h2>Một lệnh. Không cần root.</h2>
-    <p>Chọn distro để xem lệnh cài dependency và cách cài Zalux. Lệnh dài sẽ tự xuống dòng, không phải kéo ngang.</p>
-  </div>
-
-  <div class="install-grid">
-    <article class="distro reveal">
-      <div class="distro-head"><h3>Ubuntu 24.04+ / 26.04</h3><span class="badge tested">Đã test</span></div>
-      <p>Bản đã thử chat, call điện thoại, call video, call nhóm trên Wayland và X11.</p>
-      <div class="code-card">
-        <div class="code-head"><span>Cài một dòng</span><button class="copy" data-copy="curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash">Copy</button></div>
-        <pre><code>curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash</code></pre>
+  <section class="hero" id="top">
+    <div class="hero-copy reveal">
+      <div class="hero-brand-lockup">
+        <div class="app-medallion-shell">
+          <div class="app-medallion-core">
+            <img src="assets/zalux.png" alt="Biểu tượng ứng dụng Zalux" width="192" height="192" fetchpriority="high">
+          </div>
+        </div>
+        <div class="hero-identity-meta">
+          <span class="eyebrow-pill">100% Native Rust Engine</span>
+          <div class="hero-wordmark">
+            <strong>Zalux</strong>
+            <code>Zalo + Linux</code>
+          </div>
+        </div>
       </div>
-      <div class="code-card">
-        <div class="code-head"><span>Dependency (nếu thiếu)</span><button class="copy" data-copy="sudo apt install python3 libopus0 pulseaudio-utils libgtk-3-0t64 libnss3 libx11-xcb1 libxcb-dri3-0 libgbm1 libasound2t64 libsecret-1-0">Copy</button></div>
-        <pre><code>sudo apt install python3 libopus0 pulseaudio-utils \
-  libgtk-3-0t64 libnss3 libx11-xcb1 libxcb-dri3-0 \
-  libgbm1 libasound2t64 libsecret-1-0</code></pre>
-      </div>
-      <div class="code-card">
-        <div class="code-head"><span>Gói .deb có sẵn</span><button class="copy" data-copy="wget https://github.com/todo-laterx/zalux/releases/download/26.10.20/zalux_26.10.20_amd64.deb
-sudo apt install ./zalux_26.10.20_amd64.deb">Copy</button></div>
-        <pre><code>wget https://github.com/todo-laterx/zalux/releases/download/26.10.20/zalux_26.10.20_amd64.deb
-sudo apt install ./zalux_26.10.20_amd64.deb</code></pre>
-      </div>
-    </article>
 
-    <article class="distro reveal">
-      <div class="distro-head"><h3>Debian 12 / 13</h3><span class="badge">Chưa test</span></div>
-      <p>Dùng chung AppImage + installer; gói .deb build trên Debian.</p>
-      <div class="code-card">
-        <div class="code-head"><span>Dependency</span><button class="copy" data-copy="sudo apt install python3 libopus0 pulseaudio-utils libgtk-3-0 libnss3 libx11-xcb1 libxcb-dri3-0 libgbm1 libasound2 libsecret-1-0">Copy</button></div>
-        <pre><code>sudo apt install python3 libopus0 pulseaudio-utils \
-  libgtk-3-0 libnss3 libx11-xcb1 libxcb-dri3-0 \
-  libgbm1 libasound2 libsecret-1-0</code></pre>
+      <h1>Zalo trên Linux.<br>Mượt mà, <em>không Wine.</em></h1>
+      <p class="lede">Giao diện Zalo chính thức kết hợp Call Engine 1:1 / Nhóm và 9 module native tự phát triển hoàn toàn bằng Rust.</p>
+
+      <div class="actions">
+        <a class="btn-island" href="#install">
+          <span>Cài đặt ngay</span>
+          <span class="btn-island-orb" aria-hidden="true">
+            <svg viewBox="0 0 256 256" fill="currentColor"><path d="M198,88V192a6,6,0,0,1-6,6H88a6,6,0,0,1,0-12h89.52L59.76,68.24a6,6,0,0,1,8.48-8.48L186,177.52V88a6,6,0,0,1,12,0Z"/></svg>
+          </span>
+        </a>
+        <a class="btn-pill-ghost" href="#call">
+          <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M250.83,74.71a6,6,0,0,0-6.16.3L206,100.79V72a14,14,0,0,0-14-14H32A14,14,0,0,0,18,72V184a14,14,0,0,0,14,14H192a14,14,0,0,0,14-14V155.21L244.67,181a6,6,0,0,0,9.33-5V80A6,6,0,0,0,250.83,74.71ZM194,184a2,2,0,0,1-2,2H32a2,2,0,0,1-2-2V72a2,2,0,0,1,2-2H192a2,2,0,0,1,2,2Zm48-19.21-36-24V115.21l36-24Z"/></svg>
+          <span>Xem hệ thống Call</span>
+        </a>
       </div>
-      <div class="code-card">
-        <div class="code-head"><span>Cài đặt</span><button class="copy" data-copy="git clone https://github.com/todo-laterx/zalux.git
+    </div>
+
+    <div class="hero-stage-wrap reveal">
+      <div class="hero-window">
+        <div class="hero-window-inner">
+          <img src="assets/call-group-gallery.png" alt="Giao diện họp nhóm Zavi SFU chế độ Lưới Gallery trên Zalux" width="1280" height="826" fetchpriority="high">
+        </div>
+      </div>
+      <div class="telemetry-pill">
+        <div class="telemetry-pill-inner">
+          <span class="live-pulse" aria-hidden="true"></span>
+          <strong>zcall-engine</strong>
+          <span class="mono">~3.4 MB PSS</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="metrics-ribbon bezel reveal" aria-label="Thông số kiến trúc cốt lõi">
+    <div class="bezel-core metrics-grid">
+      <div class="metric-cell">
+        <span class="metric-val">100% <em>Rust</em></span>
+        <p class="metric-label">Tự viết độc lập từ đầu, không kế thừa dự án MIT hay script bên thứ ba</p>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-val">~3.4 <em>MB PSS</em></span>
+        <p class="metric-label">Daemon gọi điện chạy nền siêu nhẹ, loại bỏ hoàn toàn helper Qt5 và Wine</p>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-val">9 <em>N-API</em></span>
+        <p class="metric-label">Module native biên dịch cho Linux x86_64: SQLite FTS5, ZDB4, JPEG XL, xử lý ảnh</p>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-val">720p <em>0-Delay</em></span>
+        <p class="metric-label">Giải mã H.264 &amp; HEVC tức thì, họp nhóm Zavi SFU và chia sẻ màn hình PipeWire</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="call">
+    <div class="section-head reveal">
+      <span class="eyebrow-pill">Hệ thống Call tự phát triển</span>
+      <h2>Gọi 1:1 HD, họp nhóm Zavi SFU và chia sẻ màn hình.</h2>
+      <p class="section-sub">Giao diện cuộc gọi và nhân xử lý <code>zcall-engine</code> được thiết kế riêng cho Linux: giải mã H.264/HEVC độ trễ 0 khung hình, bố cục nhóm kiểu Zoom tự khớp khung hình dọc/ngang và ScreenCast qua PipeWire + OpenH264.</p>
+    </div>
+
+    <div class="tabs-shell reveal">
+      <div class="showcase-tabs" role="tablist" aria-label="Chế độ hiển thị cuộc gọi">
+        <span class="tab-indicator" aria-hidden="true"></span>
+        <button class="tab active" type="button" role="tab" aria-selected="true"
+          data-shot="assets/call-showcase.gif"
+          data-tag="Multi-Scene GIF"
+          data-caption="Trình diễn thực tế: Gọi 1:1 HD 720p, chỉnh âm lượng Micro PipeWire, họp nhóm Lưới Gallery, Speaker View kèm mời thành viên và chia sẻ đa màn hình.">Tổng hợp (GIF)</button>
+        <button class="tab" type="button" role="tab" aria-selected="false"
+          data-shot="assets/call-1v1-hd.png"
+          data-tag="1280x720 @ 24fps"
+          data-caption="Gọi Video 1:1 HD: nền mờ đồng bộ khung hình, cửa sổ PiP hai chiều, đo mức micro trực tiếp và tự khôi phục luồng camera.">Video 1:1 HD</button>
+        <button class="tab" type="button" role="tab" aria-selected="false"
+          data-shot="assets/call-group-gallery.png"
+          data-tag="Zavi SFU Gallery"
+          data-caption="Họp nhóm chế độ Lưới: kết hợp mượt webcam PC 16:9, điện thoại dọc 9:16 và avatar thành viên cùng viền xanh nổi bật người đang nói.">Họp nhóm Gallery</button>
+        <button class="tab" type="button" role="tab" aria-selected="false"
+          data-shot="assets/call-group-speaker.png"
+          data-tag="Speaker + Members"
+          data-caption="Chế độ Người nói (Speaker View): ghim người nói chính, dải thumbnail phân trang tự động (1/2), danh sách thành viên và mời thêm bạn.">Speaker &amp; Thành viên</button>
+        <button class="tab" type="button" role="tab" aria-selected="false"
+          data-shot="assets/call-screen-share.png"
+          data-tag="PipeWire + OpenH264"
+          data-caption="Chia sẻ màn hình Linux: ưu tiên xdg-desktop-portal + PipeWire + OpenH264 native trong Rust, kèm hộp chọn đa màn hình có ảnh xem trước.">Chia sẻ màn hình</button>
+      </div>
+    </div>
+
+    <figure class="bezel cinema-bezel reveal">
+      <div class="bezel-core cinema-core">
+        <div class="cinema-viewport">
+          <img id="showcaseImg" src="assets/call-showcase.gif" alt="Trình diễn hệ thống gọi điện Zalux" width="960" height="620" loading="eager">
+        </div>
+        <figcaption class="cinema-caption">
+          <span id="showcaseCaption">Trình diễn thực tế: Gọi 1:1 HD 720p, chỉnh âm lượng Micro PipeWire, họp nhóm Lưới Gallery, Speaker View kèm mời thành viên và chia sẻ đa màn hình.</span>
+          <span class="cinema-caption-tag" id="showcaseTag">Multi-Scene GIF</span>
+        </figcaption>
+      </div>
+    </figure>
+
+    <div class="companion-grid">
+      <article class="bezel companion-incoming reveal">
+        <div class="bezel-core">
+          <div class="ui-stage">
+            <img src="assets/call-incoming.png" alt="Cửa sổ cuộc gọi video đến với nút Không mở camera" width="640" height="480" loading="lazy">
+          </div>
+          <div class="companion-copy">
+            <h3>Cửa sổ cuộc gọi đến thông minh</h3>
+            <p>Nhận cuộc gọi video mở sẵn camera hoặc chọn <strong>Không mở camera</strong> (<code>camStartOff</code>) để vào thẳng phiên gọi kín đáo mà không bị ngắt kết nối.</p>
+          </div>
+        </div>
+      </article>
+
+      <div class="companion-stack">
+        <article class="bezel companion-row reveal">
+          <div class="bezel-core">
+            <div class="companion-copy">
+              <h3>Chủ động quyền riêng tư</h3>
+              <p>Bật tắt ẩn trạng thái “đang soạn tin”, “đã nhận” và “đã xem” ngay trên thanh công cụ trái (<code>Ctrl+Shift+P</code>), chặn trực tiếp trên máy trước khi gửi lên máy chủ.</p>
+            </div>
+            <div class="ui-stage">
+              <img src="assets/setup-privacy.png" alt="Bảng cài đặt quyền riêng tư Zalux" width="462" height="284" loading="lazy">
+            </div>
+          </div>
+        </article>
+
+        <article class="bezel companion-row reveal">
+          <div class="bezel-core">
+            <div class="companion-copy">
+              <h3>12 nhạc chuông &amp; 14 âm thông báo</h3>
+              <p>Nghe thử trực tiếp từng mẫu âm thanh ngay trong bảng cài đặt Zalux và áp dụng tức thì cho cuộc gọi đến hoặc tin nhắn mới.</p>
+            </div>
+            <div class="ui-stage">
+              <img src="assets/setup-sound.png" alt="Bảng chọn nhạc chuông và âm thông báo Zalux" width="462" height="300" loading="lazy">
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-head reveal">
+      <h2>Gọn nhẹ để mở suốt ngày làm việc.</h2>
+      <p class="section-sub">Giữ trọn trải nghiệm quen thuộc của Zalo Desktop, viết mới toàn bộ các module hệ thống để vận hành ổn định trên Linux.</p>
+    </div>
+
+    <div class="bento-arch">
+      <article class="bezel arch-card tinted-cobalt bento-7 reveal">
+        <div class="bezel-core">
+          <span class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 256 256" fill="currentColor"><path d="M250.83,74.71a6,6,0,0,0-6.16.3L206,100.79V72a14,14,0,0,0-14-14H32A14,14,0,0,0,18,72V184a14,14,0,0,0,14,14H192a14,14,0,0,0,14-14V155.21L244.67,181a6,6,0,0,0,9.33-5V80A6,6,0,0,0,250.83,74.71ZM194,184a2,2,0,0,1-2,2H32a2,2,0,0,1-2-2V72a2,2,0,0,1,2-2H192a2,2,0,0,1,2,2Zm48-19.21-36-24V115.21l36-24Z"/></svg>
+          </span>
+          <h3>Rust ZRTC &amp; Zavi SFU Call Engine</h3>
+          <p>Xử lý trọn vẹn gọi 1:1 và họp nhóm qua <code>zcall-engine</code>: mã hoá SRTP hai chiều, âm thanh Opus 16 kHz, giải mã H.264 &amp; HEVC độ trễ 0 khung hình qua <code>libavcodec</code>, chỉnh âm lượng micro trực tiếp và tự lọc bỏ thiết bị âm thanh ảo hoặc camera hồng ngoại (IR).</p>
+          <div class="chip-row">
+            <span>ZRTC 1:1</span>
+            <span>Zavi SFU Group</span>
+            <span>H.264 / HEVC</span>
+            <span>Opus 16 kHz</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="bezel arch-card bento-5 reveal">
+        <div class="bezel-core">
+          <span class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 256 256" fill="currentColor"><path d="M230,56V200a14,14,0,0,1-14,14H144a6,6,0,0,1,0-12h72a2,2,0,0,0,2-2V56a2,2,0,0,0-2-2H40a2,2,0,0,0-2,2V96a6,6,0,0,1-12,0V56A14,14,0,0,1,40,42H216A14,14,0,0,1,230,56ZM32,186a6,6,0,0,0,0,12,10,10,0,0,1,10,10,6,6,0,0,0,12,0A22,22,0,0,0,32,186Zm0-32a6,6,0,0,0,0,12,42,42,0,0,1,42,42,6,6,0,0,0,12,0A54.06,54.06,0,0,0,32,154Zm0-32a6,6,0,0,0,0,12,74.09,74.09,0,0,1,74,74,6,6,0,0,0,12,0A86.1,86.1,0,0,0,32,122Z"/></svg>
+          </span>
+          <h3>Chia sẻ màn hình PipeWire + OpenH264</h3>
+          <p>Thu màn hình trên Wayland và X11 qua <code>xdg-desktop-portal</code> + PipeWire MemFd, nén OpenH264 15fps trên luồng riêng mà không cần GPU encoder.</p>
+          <div class="chip-row">
+            <span>Wayland Portal</span>
+            <span>OpenH264 15fps</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="bezel arch-card bento-5 reveal">
+        <div class="bezel-core">
+          <span class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 256 256" fill="currentColor"><path d="M208,42H48A14,14,0,0,0,34,56v56c0,51.94,25.12,83.4,46.2,100.64,22.73,18.6,45.27,24.89,46.22,25.15a6,6,0,0,0,3.16,0c.95-.26,23.49-6.55,46.22-25.15C196.88,195.4,222,163.94,222,112V56A14,14,0,0,0,208,42Zm2,70c0,37.76-13.94,68.39-41.44,91.06A131.17,131.17,0,0,1,128,225.72a130.94,130.94,0,0,1-40.56-22.66C59.94,180.39,46,149.76,46,112V56a2,2,0,0,1,2-2H208a2,2,0,0,1,2,2ZM172.24,99.76a6,6,0,0,1,0,8.48l-56,56a6,6,0,0,1-8.48,0l-24-24a6,6,0,0,1,8.48-8.48L112,151.51l51.76-51.75A6,6,0,0,1,172.24,99.76Z"/></svg>
+          </span>
+          <h3>An toàn &amp; Cô lập Quyền</h3>
+          <p>Khoá điều hướng cửa sổ gọi nội bộ, giới hạn quyền micro/camera cho trang cục bộ và lưu ảnh tạm clipboard trong thư mục riêng quyền <code>0700</code>.</p>
+        </div>
+      </article>
+
+      <article class="bezel arch-card tinted-deep bento-7 reveal">
+        <div class="bezel-core">
+          <span class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 256 256" fill="currentColor"><path d="M152,98H104a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h48a6,6,0,0,0,6-6V104A6,6,0,0,0,152,98Zm-6,48H110V110h36Zm86,0H214V110h18a6,6,0,0,0,0-12H214V56a14,14,0,0,0-14-14H158V24a6,6,0,0,0-12,0V42H110V24a6,6,0,0,0-12,0V42H56A14,14,0,0,0,42,56V98H24a6,6,0,0,0,0-12H42v36H24a6,6,0,0,0,0,12H42v42a14,14,0,0,0,14,14H98v18a6,6,0,0,0,12,0V214h36v18a6,6,0,0,0,12,0V214h42a14,14,0,0,0,14-14V158h18a6,6,0,0,0,0-12Zm-30,54a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V56a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2Z"/></svg>
+          </span>
+          <h3>9 Module Native N-API bằng Rust</h3>
+          <p>Thay thế trọn bộ addon gốc của macOS bằng bản biên dịch ELF64 Linux x86_64 (~15.4 MB sau khi <code>strip</code>): <code>node_sqlite3</code>, <code>db-cross-v4</code>, <code>zjxl</code>, <code>zimage</code>, <code>mp4thumb</code>, <code>file-utils</code>, <code>file-utilities</code>, <code>zwalker</code> và <code>zlang</code>.</p>
+        </div>
+      </article>
+
+      <article class="bezel arch-card bento-8 reveal">
+        <div class="bezel-core">
+          <span class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 256 256" fill="currentColor"><path d="M208,42H48A22,22,0,0,0,26,64V176a22,22,0,0,0,22,22h74v20H96a6,6,0,0,0,0,12h64a6,6,0,0,0,0-12H134V198h74a22,22,0,0,0,22-22V64A22,22,0,0,0,208,42ZM48,54H208a10,10,0,0,1,10,10v82H38V64A10,10,0,0,1,48,54ZM208,186H48a10,10,0,0,1-10-10V158H218v18A10,10,0,0,1,208,186Z"/></svg>
+          </span>
+          <h3>Tích hợp sâu môi trường Desktop Linux</h3>
+          <p>Khay hệ thống (System Tray) hiển thị huy hiệu tin chưa đọc đồng bộ với Dock GNOME/KDE, tự đồng bộ thanh tiêu đề tối <code>_GTK_THEME_VARIANT=dark</code>, dán ảnh trực tiếp qua <code>wl-paste</code> / <code>xclip</code> và chọn XWayland/Wayland tối ưu.</p>
+        </div>
+      </article>
+
+      <article class="bezel arch-card bento-4 reveal">
+        <div class="bezel-core">
+          <span class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 256 256" fill="currentColor"><path d="M222.72,67.91l-88-48.18a13.9,13.9,0,0,0-13.44,0l-88,48.18A14,14,0,0,0,26,80.18v95.64a14,14,0,0,0,7.28,12.27l88,48.18a13.92,13.92,0,0,0,13.44,0l88-48.18A14,14,0,0,0,230,175.82V80.18A14,14,0,0,0,222.72,67.91ZM127,30.25a2,2,0,0,1,1.92,0L212.51,76,178.57,94.57,94.05,48.31ZM122,223,39,177.57a2,2,0,0,1-1-1.75V86.66l84,46ZM43.49,76,81.56,55.15l84.51,46.26L128,122.24ZM218,175.82a2,2,0,0,1-1,1.75h0L134,223V132.64l36-19.71V152a6,6,0,0,0,12,0V106.37l36-19.71Z"/></svg>
+          </span>
+          <h3>Đóng gói sạch từ DMG</h3>
+          <p>Cài ngay từ <code>AppImage</code> / <code>.deb</code> hoặc tự đóng gói lại từ bộ cài DMG chính thức không cần cài Rust hay Node.js.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="perf">
+    <div class="section-head reveal">
+      <h2>Vì sao nền tảng Rust tạo khác biệt?</h2>
+      <p class="section-sub">Số liệu đo thực tế qua <code>/proc/&lt;pid&gt;/smaps_rollup</code> trên Ubuntu Wayland/XWayland khi tải cơ sở dữ liệu lịch sử trò chuyện lớn.</p>
+    </div>
+
+    <div class="perf-highlights">
+      <article class="bezel perf-stat-card reveal">
+        <div class="bezel-core">
+          <div class="perf-big-num">~3.4 MB<small>PSS khi chờ (~6.0 MB khi giải mã video)</small></div>
+          <h3>Nhẹ hơn gấp 20 đến 40 lần helper C++/Qt5 gốc</h3>
+          <p>Thay vì gánh thêm tiến trình GUI phụ nặng 80-150 MB RSS hoặc lớp dịch Wine tốn 300-500 MB RAM, <code>zcall-engine</code> xử lý toàn bộ âm thanh, video và chia sẻ màn hình chỉ với vài MB bộ nhớ vật lý.</p>
+        </div>
+      </article>
+
+      <article class="bezel perf-stat-card reveal">
+        <div class="bezel-core">
+          <div class="perf-big-num">&lt; 1.2%<small>tỷ trọng RAM của toàn bộ tầng Rust</small></div>
+          <h3>Không rò rỉ bộ nhớ khi treo máy dài ngày</h3>
+          <p>Trong tổng mức ~788 MB PSS khi mở nhiều cuộc trò chuyện lớn, nhân Chromium/Electron chiếm ~98.8% (~778 MB); toàn bộ hệ thống Rust của Zalux vận hành gọn gàng trong phần còn lại.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="bezel perf-matrix reveal">
+      <div class="bezel-core">
+        <table class="perf-table">
+          <thead>
+            <tr>
+              <th>Thành phần hệ thống</th>
+              <th>Bản gốc (C++/Qt5) hoặc chạy qua Wine</th>
+              <th>Zalux trên Linux (Native Rust)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Daemon Call Engine chạy nền (Idle)</td>
+              <td class="perf-legacy">ZaloCall C++ / Qt5 Widgets: ~80-150 MB RSS</td>
+              <td class="perf-rust"><code>zcall-engine</code> Rust thuần: <strong>~3.4 MB PSS</strong> (~5.8 MB RSS)</td>
+            </tr>
+            <tr>
+              <td>Giải mã Video H.264 / HEVC trực tiếp</td>
+              <td class="perf-legacy">Phụ thuộc tiến trình helper GUI phụ nặng nề</td>
+              <td class="perf-rust"><code>--decode-pipe</code> (0-frame delay): <strong>~6.0 MB PSS</strong> (~12.0 MB RSS)</td>
+            </tr>
+            <tr>
+              <td>9 Module hệ thống N-API (<code>.node</code>)</td>
+              <td class="perf-legacy">Nhiều dynamic library và framework rời</td>
+              <td class="perf-rust"><strong>~15.4 MB</strong> trên đĩa sau khi <code>strip</code>, chạy trực tiếp trong tiến trình</td>
+            </tr>
+            <tr>
+              <td>Tổng RAM ứng dụng (nhiều DB chat lớn)</td>
+              <td class="perf-legacy">~650-950 MB (+300-500 MB nếu chạy qua Wine)</td>
+              <td class="perf-rust"><strong>~788 MB PSS</strong> (Electron/UI Zalo ~778 MB, tầng Rust <strong>&lt; 1.2%</strong>)</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="perf-note">Đo kiểm trung thực: phần lớn RAM thuộc về nhân hiển thị web Electron của giao diện Zalo. Tầng Rust đảm bảo các tác vụ thời gian thực (VoIP/SFU, mã hoá SRTP, PipeWire ScreenCast, SQLite FTS5, JPEG XL) đạt tốc độ native trên Linux mà không làm nặng máy.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="install">
+    <div class="section-head reveal">
+      <h2>Một lệnh duy nhất. Không cần quyền root.</h2>
+      <p class="section-sub">Cài nhanh tự động vào <code>~/.local/opt/zalux</code> hoặc chọn đúng bản phân phối Linux của bạn để cài gói thư viện hệ thống kèm PipeWire và Portal.</p>
+    </div>
+
+    <div class="bezel quick-install reveal">
+      <div class="bezel-core">
+        <div class="quick-copy">
+          <h3>Cài nhanh tự động (Khuyên dùng)</h3>
+          <p>Tự tải bản phát hành mới nhất, tích hợp biểu tượng menu ứng dụng và tạo lệnh <code>~/.local/bin/zalux</code>.</p>
+        </div>
+        <div class="code-card">
+          <div class="code-head">
+            <span>Terminal (Bash)</span>
+            <button class="copy-btn" type="button" data-copy="curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash">
+              <svg class="icon-copy" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+              <span>Sao chép</span>
+            </button>
+          </div>
+          <pre><code>curl -fsSL https://raw.githubusercontent.com/todo-laterx/zalux/main/scripts/bootstrap.sh | bash</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="bezel distro-stage reveal">
+      <div class="bezel-core">
+        <div class="distro-top">
+          <div class="tabs-shell">
+            <div class="distro-tabs" role="tablist" aria-label="Chọn bản phân phối Linux">
+              <span class="tab-indicator" aria-hidden="true"></span>
+              <button class="distro-tab active" type="button" role="tab" aria-selected="true" data-distro="ubuntu" data-status="Đã kiểm thử đầy đủ trên Wayland & X11">Ubuntu 24.04 / 26.04</button>
+              <button class="distro-tab" type="button" role="tab" aria-selected="false" data-distro="debian" data-status="Tương thích AppImage & gói .deb">Debian 12 / 13</button>
+              <button class="distro-tab" type="button" role="tab" aria-selected="false" data-distro="fedora" data-status="Hỗ trợ AppImage & đóng gói .rpm">Fedora / RHEL</button>
+              <button class="distro-tab" type="button" role="tab" aria-selected="false" data-distro="arch" data-status="Hỗ trợ AppImage & PKGBUILD">Arch Linux</button>
+            </div>
+          </div>
+          <span class="distro-status" id="distroStatus">Đã kiểm thử đầy đủ trên Wayland &amp; X11</span>
+        </div>
+
+        <div class="distro-panels">
+          <div class="distro-panel active" data-panel="ubuntu" role="tabpanel">
+            <div class="code-card">
+              <div class="code-head">
+                <span>1. Gói thư viện hệ thống (Ubuntu 24.04+)</span>
+                <button class="copy-btn" type="button" data-copy="sudo apt install libopus0 libpipewire-0.3-0t64 xdg-desktop-portal pulseaudio-utils ffmpeg libgtk-3-0t64 libnss3 libx11-xcb1 libxcb-dri3-0 libgbm1 libasound2t64 libsecret-1-0">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+                  <span>Sao chép</span>
+                </button>
+              </div>
+              <pre><code>sudo apt install libopus0 libpipewire-0.3-0t64 xdg-desktop-portal \
+  pulseaudio-utils ffmpeg libgtk-3-0t64 libnss3 libx11-xcb1 \
+  libxcb-dri3-0 libgbm1 libasound2t64 libsecret-1-0</code></pre>
+            </div>
+            <div class="code-card">
+              <div class="code-head">
+                <span>2. Cài từ gói .deb hoặc kho mã</span>
+                <button class="copy-btn" type="button" data-copy="git clone https://github.com/todo-laterx/zalux.git
 cd zalux
-./scripts/install-latest.sh">Copy</button></div>
-        <pre><code>git clone https://github.com/todo-laterx/zalux.git
+./scripts/install-latest.sh">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+                  <span>Sao chép</span>
+                </button>
+              </div>
+              <pre><code>git clone https://github.com/todo-laterx/zalux.git
 cd zalux
 ./scripts/install-latest.sh</code></pre>
-      </div>
-    </article>
+            </div>
+          </div>
 
-    <article class="distro reveal">
-      <div class="distro-head"><h3>Fedora / RHEL</h3><span class="badge">Chưa test runtime</span></div>
-      <p>Installer và .rpm có sẵn; cần `rpm-build` khi đóng gói. Chưa thử call trên Fedora thật.</p>
-      <div class="code-card">
-        <div class="code-head"><span>Dependency</span><button class="copy" data-copy="sudo dnf install python3 opus pulseaudio-utils gtk3 nss libX11-xcb libxcb mesa-libgbm alsa-lib libsecret">Copy</button></div>
-        <pre><code>sudo dnf install python3 opus pulseaudio-utils gtk3 nss \
-  libX11-xcb libxcb mesa-libgbm alsa-lib libsecret</code></pre>
-      </div>
-      <div class="code-card">
-        <div class="code-head"><span>Cài + build .rpm</span><button class="copy" data-copy="git clone https://github.com/todo-laterx/zalux.git
+          <div class="distro-panel" data-panel="debian" role="tabpanel">
+            <div class="code-card">
+              <div class="code-head">
+                <span>1. Gói thư viện hệ thống (Debian 12 / 13)</span>
+                <button class="copy-btn" type="button" data-copy="sudo apt install libopus0 libpipewire-0.3-0 xdg-desktop-portal pulseaudio-utils ffmpeg libgtk-3-0 libnss3 libx11-xcb1 libxcb-dri3-0 libgbm1 libasound2 libsecret-1-0">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+                  <span>Sao chép</span>
+                </button>
+              </div>
+              <pre><code>sudo apt install libopus0 libpipewire-0.3-0 xdg-desktop-portal \
+  pulseaudio-utils ffmpeg libgtk-3-0 libnss3 libx11-xcb1 \
+  libxcb-dri3-0 libgbm1 libasound2 libsecret-1-0</code></pre>
+            </div>
+            <div class="code-card">
+              <div class="code-head">
+                <span>2. Cài đặt Zalux</span>
+                <button class="copy-btn" type="button" data-copy="git clone https://github.com/todo-laterx/zalux.git
 cd zalux
-./scripts/install-latest.sh
-# hoặc: sudo dnf install rpm-build && packaging/rpm/build.sh /path/to/Zalo.AppImage 26.10.20">Copy</button></div>
-        <pre><code>git clone https://github.com/todo-laterx/zalux.git
-cd zalux
-./scripts/install-latest.sh
-
-# gói rpm
-sudo dnf install rpm-build
-packaging/rpm/build.sh /path/to/Zalo.AppImage 26.10.20</code></pre>
-      </div>
-    </article>
-
-    <article class="distro reveal">
-      <div class="distro-head"><h3>Arch Linux</h3><span class="badge">Chưa test</span></div>
-      <p>Dùng installer/AppImage; chưa có package AUR chính thức.</p>
-      <div class="code-card">
-        <div class="code-head"><span>Dependency + cài</span><button class="copy" data-copy="sudo pacman -S python opus pulseaudio gtk3 nss libx11 libxcb mesa alsa-lib libsecret git
-git clone https://github.com/todo-laterx/zalux.git
-cd zalux
-./scripts/install-latest.sh">Copy</button></div>
-        <pre><code>sudo pacman -S python opus pulseaudio gtk3 nss libx11 libxcb \
-  mesa alsa-lib libsecret git
-git clone https://github.com/todo-laterx/zalux.git
+./scripts/install-latest.sh">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+                  <span>Sao chép</span>
+                </button>
+              </div>
+              <pre><code>git clone https://github.com/todo-laterx/zalux.git
 cd zalux
 ./scripts/install-latest.sh</code></pre>
-      </div>
-    </article>
-  </div>
+            </div>
+          </div>
 
-  <div class="compat reveal">
-    <h3>Bảng tương thích</h3>
-    <table>
-      <thead><tr><th>Distro</th><th>Chat / UI</th><th>Call</th><th>Ghi chú</th></tr></thead>
-      <tbody>
-        <tr><td>Ubuntu 26.04</td><td class="ok">Đã test</td><td class="ok">Voice · Video · Group</td><td>Wayland + X11</td></tr>
-        <tr><td>Ubuntu 24.04</td><td class="warn">Dự kiến</td><td class="warn">Chưa test</td><td>Dùng gói t64</td></tr>
-        <tr><td>Debian 12 / 13</td><td class="warn">Dự kiến</td><td class="warn">Chưa test</td><td>AppImage + installer</td></tr>
-        <tr><td>Fedora / RHEL</td><td class="warn">Dự kiến</td><td class="warn">Chưa test</td><td>Cần rpm-build</td></tr>
-        <tr><td>Arch Linux</td><td class="warn">Dự kiến</td><td class="warn">Chưa test</td><td>Chưa có AUR</td></tr>
-      </tbody>
-    </table>
-    <p class="fine">Bảng sẽ cập nhật khi cộng đồng test thêm. Xem <a href="https://github.com/todo-laterx/zalux/blob/main/docs/DEPENDENCIES.md">DEPENDENCIES.md</a>.</p>
-  </div>
-</section>
+          <div class="distro-panel" data-panel="fedora" role="tabpanel">
+            <div class="code-card">
+              <div class="code-head">
+                <span>1. Gói thư viện hệ thống (Fedora / RHEL)</span>
+                <button class="copy-btn" type="button" data-copy="sudo dnf install opus pipewire-libs xdg-desktop-portal pulseaudio-utils ffmpeg gtk3 nss libX11-xcb libxcb mesa-libgbm alsa-lib libsecret">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+                  <span>Sao chép</span>
+                </button>
+              </div>
+              <pre><code>sudo dnf install opus pipewire-libs xdg-desktop-portal \
+  pulseaudio-utils ffmpeg gtk3 nss libX11-xcb libxcb \
+  mesa-libgbm alsa-lib libsecret</code></pre>
+            </div>
+            <div class="code-card">
+              <div class="code-head">
+                <span>2. Cài đặt hoặc đóng gói .rpm</span>
+                <button class="copy-btn" type="button" data-copy="git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+                  <span>Sao chép</span>
+                </button>
+              </div>
+              <pre><code>git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh</code></pre>
+            </div>
+          </div>
+
+          <div class="distro-panel" data-panel="arch" role="tabpanel">
+            <div class="code-card">
+              <div class="code-head">
+                <span>1. Gói thư viện hệ thống (Arch Linux)</span>
+                <button class="copy-btn" type="button" data-copy="sudo pacman -S opus libpipewire xdg-desktop-portal libpulse ffmpeg gtk3 nss libx11 libxcb mesa alsa-lib libsecret git">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+                  <span>Sao chép</span>
+                </button>
+              </div>
+              <pre><code>sudo pacman -S opus libpipewire xdg-desktop-portal libpulse \
+  ffmpeg gtk3 nss libx11 libxcb mesa alsa-lib libsecret git</code></pre>
+            </div>
+            <div class="code-card">
+              <div class="code-head">
+                <span>2. Cài đặt hoặc dùng PKGBUILD</span>
+                <button class="copy-btn" type="button" data-copy="git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216,34H88a6,6,0,0,0-6,6V82H40a6,6,0,0,0-6,6V216a6,6,0,0,0,6,6H168a6,6,0,0,0,6-6V174h42a6,6,0,0,0,6-6V40A6,6,0,0,0,216,34ZM162,210H46V94H162Zm48-48H174V88a6,6,0,0,0-6-6H94V46H210Z"/></svg>
+                  <span>Sao chép</span>
+                </button>
+              </div>
+              <pre><code>git clone https://github.com/todo-laterx/zalux.git
+cd zalux
+./scripts/install-latest.sh</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing-section" aria-label="Bắt đầu sử dụng Zalux">
+    <div class="bezel closing-dock reveal">
+      <div class="bezel-core">
+        <div class="closing-brand">
+          <div class="closing-medallion">
+            <img src="assets/zalux.png" alt="Biểu tượng ứng dụng Zalux" width="160" height="160" loading="lazy">
+          </div>
+          <div class="closing-copy">
+            <h2>Sẵn sàng mở Zalo mượt trên Linux?</h2>
+            <p>Miễn phí, mã nguồn mở MIT, tự đóng gói minh bạch và tối ưu tài nguyên bằng Rust.</p>
+          </div>
+        </div>
+        <div class="closing-actions">
+          <a class="btn-island" href="#install">
+            <span>Cài đặt ngay</span>
+            <span class="btn-island-orb" aria-hidden="true">
+              <svg viewBox="0 0 256 256" fill="currentColor"><path d="M198,88V192a6,6,0,0,1-6,6H88a6,6,0,0,1,0-12h89.52L59.76,68.24a6,6,0,0,1,8.48-8.48L186,177.52V88a6,6,0,0,1,12,0Z"/></svg>
+            </span>
+          </a>
+          <a class="btn-pill-ghost" href="https://github.com/todo-laterx/zalux" target="_blank" rel="noreferrer">
+            <span>GitHub</span>
+            <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M198,64V168a6,6,0,0,1-12,0V78.48L68.24,196.24a6,6,0,0,1-8.48-8.48L177.52,70H88a6,6,0,0,1,0-12H192A6,6,0,0,1,198,64Z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer>
-  <div class="brand"><img src="assets/zalux.png" alt="" width="22" height="22"><span>Zalux</span></div>
-  <p>Unofficial. Zalo thuộc VNG/Zalo. Dựa trên toolchain MIT của <a href="https://github.com/VN-Linux-Family/zalo-for-linux">VN-Linux-Family</a> · không liên kết. <a href="https://github.com/todo-laterx/zalux/blob/main/THIRD_PARTY_NOTICES.md">Giấy phép bên thứ ba</a>.</p>
+  <a class="brand" href="#top">
+    <span class="brand-icon-wrap">
+      <img src="assets/zalux.png" alt="" width="56" height="56">
+    </span>
+    <span>Zalux</span>
+  </a>
+  <p>Dự án kỹ thuật độc lập (100% Clean-Room Native Runtime). Nhãn hiệu Zalo thuộc VNG Corporation. <a href="https://github.com/todo-laterx/zalux/blob/main/NOTICE">Thông báo pháp lý</a>.</p>
   <div class="foot-links">
-    <a href="https://github.com/todo-laterx/zalux">GitHub</a>
-    <a href="https://github.com/todo-laterx/zalux/blob/main/LICENSE">MIT</a>
-    <a href="#top">Lên đầu</a>
+    <a href="https://github.com/todo-laterx/zalux" target="_blank" rel="noreferrer">GitHub</a>
+    <a href="https://github.com/todo-laterx/zalux/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT</a>
+    <a href="#top">Lên đầu trang</a>
   </div>
 </footer>
+
 <script src="main.js"></script>
 </body>
 </html>

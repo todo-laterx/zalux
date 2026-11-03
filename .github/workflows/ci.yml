@@ -7,15 +7,21 @@ jobs:
       - uses: actions/checkout@v4
       - name: Shell syntax
         run: |
-          for f in installer/*.sh scripts/*.sh packaging/deb/*.sh packaging/rpm/*.sh patches/*.sh; do
+          for f in installer/*.sh scripts/*.sh packaging/deb/*.sh packaging/rpm/*.sh packaging/flatpak/*.sh; do
             bash -n "$f"
           done
       - name: Shellcheck
         run: |
           sudo apt-get update -qq && sudo apt-get install -y shellcheck
-          shellcheck -S warning installer/*.sh scripts/*.sh packaging/deb/*.sh packaging/rpm/*.sh patches/*.sh || true
-      - name: Python syntax
-        run: python3 -m py_compile patches/install-userscripts.py
-      - name: Markdown links
+          shellcheck -S warning installer/*.sh scripts/*.sh packaging/deb/*.sh packaging/rpm/*.sh || true
+      - name: Python & JS syntax
+        run: |
+          python3 -m py_compile runtime/toolchain/*.py
+          for js in runtime/plugins/zcall/bridge.js runtime/plugins/zcall/ui/*.js runtime/plugins/zalux/*.js; do
+            node --check "$js"
+          done
+      - name: Required files & hygiene
         run: |
           test -f README.md && test -f LICENSE && test -f NOTICE
+          test -x runtime/bin/zcall-engine && test -x runtime/bin/zalo-asar
+          ! find . -name "*.dmg" -o -name "*.asar" -o -name "ringtone-zalo.mp3" | grep -q .

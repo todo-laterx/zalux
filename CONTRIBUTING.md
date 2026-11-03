@@ -1,27 +1,24 @@
 # Đóng góp cho Zalux
 
-Cảm ơn bạn muốn giúp Zalux tốt hơn.
+Cảm ơn bạn đã đóng góp cải thiện Zalux trên Linux.
 
 ## Báo lỗi
-Mở issue với:
-- Distro + phiên bản (Ubuntu 26.04, Fedora 42, …), Wayland/X11.
-- Phiên bản Zalo/Zalux (`cat VERSION`).
-- Bước tái hiện, log liên quan (`~/.config/ZaloData/native-engine-*.log`, console app).
-- Ảnh/video nếu là lỗi UI.
+Mở issue kèm thông tin:
+- Bản phân phối + phiên bản (Ubuntu 26.04, Debian 13, Fedora 42, …), môi trường hiển thị (Wayland / X11).
+- Phiên bản Zalux (`cat VERSION`).
+- Các bước tái hiện và log liên quan (đã xoá thông tin nhạy cảm / ID cá nhân).
+- Ảnh chụp hoặc video minh hoạ nếu là lỗi giao diện / cuộc gọi.
 
-## Gửi patch
-- Patch nhỏ, đúng một mục đích; giải thích lý do trong PR.
-- Không commit binary Zalo, AppImage, DMG, hay dữ liệu tài khoản.
-- Chạy `shellcheck` cho script và `python3 -m py_compile` cho Python trước khi gửi.
-- Với patch asar/preload: ghi rõ áp dụng cho phiên bản Zalo nào; ưu tiên cách ít phụ thuộc bundle nhất.
+## Gửi Pull Request
+- Giữ phạm vi thay đổi gọn, tập trung vào một mục tiêu rõ ràng.
+- Tuyệt đối không commit binary Zalo, file `.dmg`, `.asar`, `.AppImage`, âm thanh gốc của Zalo hay dữ liệu tài khoản.
+- Kiểm tra cú pháp với `bash -n`, `node --check` và `python3 -m py_compile` trước khi gửi.
 
-## Cập nhật phiên bản Zalo
+## Quy trình cập nhật khi Zalo ra phiên bản mới
 1. `./scripts/check-update.sh`
-2. `./scripts/update.sh` (nếu upstream có bản mới)
-3. Nếu upstream chưa có: `./scripts/build-from-dmg.sh <version>` rồi kiểm tra call/UI.
-4. Cập nhật `VERSION`, `CHANGELOG.md`, build lại deb/rpm nếu cần.
+2. `./scripts/build-from-dmg.sh <version>` để đóng gói từ DMG macOS chính thức và kiểm thử Chat / Voice / Video Call.
+3. Cập nhật `VERSION`, `CHANGELOG.md` và tạo gói `.AppImage` / `.deb` / `.rpm`.
 
 ## Nguyên tắc
-- Tôn trọng người dùng: không telemetry, không gửi dữ liệu ra ngoài.
-- Không hứa tính năng chưa kiểm chứng.
-- Giữ attribution cho upstream và Mixkit.
+- Không telemetry, không gửi dữ liệu người dùng ra ngoài.
+- Giữ ghi nhận bản quyền mẫu âm thanh Mixkit Free License trong `NOTICE`.

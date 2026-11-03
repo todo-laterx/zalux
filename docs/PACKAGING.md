@@ -1,22 +1,29 @@
-# Packaging
+# Hướng dẫn Đóng gói (Packaging)
 
-## deb
+## 1. Đóng gói từ DMG macOS chính thức
 ```bash
-packaging/deb/build.sh dist/Zalux-26.10.20.AppImage 26.10.20
+./scripts/build-from-dmg.sh 26.10.20
+# hoặc truyền đường dẫn file DMG đã tải sẵn:
+./scripts/build-from-dmg.sh /path/to/ZaloSetup-universal-26.10.20.dmg
+```
+Kết quả tạo ra thư mục `build/AppDir` và gói `dist/Zalux-26.10.20-x86_64.AppImage`.
+
+## 2. Đóng gói `.deb` (Debian / Ubuntu)
+```bash
+packaging/deb/build.sh dist/Zalux-26.10.20-x86_64.AppImage 26.10.20
+# hoặc đóng gói thẳng từ build/AppDir:
+packaging/deb/build.sh build/AppDir 26.10.20
 # -> dist/zalux_26.10.20_amd64.deb
 ```
-Gói cài `/opt/zalux` (AppDir đã extract + patch), `/usr/bin/zalux`, desktop entry.
-Wrapper tự cài ZaSetup userscript + sounds vào `~/.config/ZaloData` / `~/.local/share/zalo-linux` lần đầu chạy.
+Gói cài đặt vào `/opt/zalux`, tạo lệnh `/usr/bin/zalux`, biểu tượng hệ thống và `zalux.desktop`.
 
-## rpm
+## 3. Đóng gói `.rpm` (Fedora / RHEL / openSUSE)
 ```bash
-sudo apt install rpm        # hoặc dnf install rpm-build
-packaging/rpm/build.sh dist/Zalux-26.10.20.AppImage 26.10.20
-# -> ~/rpmbuild/RPMS/x86_64/zalux-26.10.20-1.x86_64.rpm
+sudo dnf install rpm-build   # hoặc sudo apt install rpm
+packaging/rpm/build.sh dist/Zalux-26.10.20-x86_64.AppImage 26.10.20
+# -> dist/zalux-26.10.20-1.x86_64.rpm
 ```
 
 ## Tương thích
-- AppImage: mọi distro glibc ≥ 2.31 (Electron 22).
-- deb: Debian/Ubuntu; khai báo dependency ở trên.
-- rpm: Fedora/RHEL/openSUSE; spec khai báo tên gói RPM tương ứng.
-- Không đóng gói kèm DMG/Zalo binary vào repo; build từ AppImage official/upstream tại máy người dùng.
+- **AppImage / AppDir**: mọi bản phân phối Linux `x86_64` có `glibc >= 2.31`.
+- **Nguyên tắc phân phối mã nguồn**: Repo không lưu trữ `.dmg`, `.asar` hoặc tài sản độc quyền của Zalo; quá trình đóng gói kết hợp client chính thức với bộ runtime Rust trong `runtime/`.

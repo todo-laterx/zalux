@@ -1,5 +1,8 @@
 dist/
 build/
+zcall-assets/
+*.dmg
+*.asar
 *.AppImage
 *.deb
 *.rpm
