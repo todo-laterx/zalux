@@ -94,6 +94,92 @@
     }, 110);
   });
 
+  // 3b. Zalux Studio Interactive Companion Switcher (with Auto-Slide & Progress)
+  const studioCard = document.getElementById('companionStudio');
+  const studioTabsWrap = document.querySelector('.studio-tabs');
+  const studioTabsList = [...document.querySelectorAll('.studio-tab')];
+  const studioImg = document.getElementById('studioImg');
+  const studioTitle = document.getElementById('studioTitle');
+  const studioDesc = document.getElementById('studioDesc');
+  const studioPoints = document.getElementById('studioPoints');
+  const studioCopy = studioDesc?.closest('.studio-copy');
+  const studioProgress = document.getElementById('studioProgress');
+  let studioSwapTimer = 0;
+
+  const restartStudioProgress = () => {
+    if (!studioTabsWrap || !studioProgress || reduce) return;
+    studioTabsWrap.classList.remove('is-autoplaying');
+    // Force reflow to restart CSS keyframe animation cleanly
+    void studioProgress.offsetWidth;
+    studioTabsWrap.classList.add('is-autoplaying');
+  };
+
+  bindSlidingTabs('.studio-tabs', '.studio-tab', (tab) => {
+    const nextSrc = tab.dataset.shot;
+    const nextAlt = tab.dataset.alt;
+    const nextTitle = tab.dataset.title;
+    const nextDesc = tab.dataset.desc;
+    const pts = [tab.dataset.p1, tab.dataset.p2, tab.dataset.p3].filter(Boolean);
+    if (!studioImg || !nextSrc) return;
+
+    restartStudioProgress();
+
+    const applyStudioContent = () => {
+      studioImg.src = nextSrc;
+      if (nextAlt) studioImg.alt = nextAlt;
+      if (studioTitle && nextTitle) studioTitle.textContent = nextTitle;
+      if (studioDesc && nextDesc) studioDesc.textContent = nextDesc;
+      if (studioPoints && pts.length) {
+        studioPoints.replaceChildren(
+          ...pts.map((text) => {
+            const li = document.createElement('li');
+            li.textContent = text;
+            return li;
+          })
+        );
+      }
+    };
+
+    if (reduce) {
+      applyStudioContent();
+      return;
+    }
+
+    clearTimeout(studioSwapTimer);
+    studioImg.classList.add('is-switching');
+    studioTitle?.classList.add('is-switching');
+    studioCopy?.classList.add('is-switching');
+    studioPoints?.classList.add('is-switching');
+    const pre = new Image();
+    pre.src = nextSrc;
+    studioSwapTimer = window.setTimeout(() => {
+      applyStudioContent();
+      requestAnimationFrame(() => {
+        studioImg.classList.remove('is-switching');
+        studioTitle?.classList.remove('is-switching');
+        studioCopy?.classList.remove('is-switching');
+        studioPoints?.classList.remove('is-switching');
+      });
+    }, 110);
+  });
+
+  if (studioProgress && studioTabsWrap && studioTabsList.length > 1 && !reduce) {
+    restartStudioProgress();
+    studioProgress.addEventListener('animationend', () => {
+      const currentIdx = studioTabsList.findIndex((t) => t.classList.contains('active'));
+      const nextIdx = (currentIdx + 1) % studioTabsList.length;
+      studioTabsList[nextIdx]?.click();
+    });
+    if (studioCard) {
+      studioCard.addEventListener('mouseenter', () => {
+        studioTabsWrap.classList.add('is-paused');
+      });
+      studioCard.addEventListener('mouseleave', () => {
+        studioTabsWrap.classList.remove('is-paused');
+      });
+    }
+  }
+
   // 4. Distro Switcher
   const distroStatus = document.getElementById('distroStatus');
   const distroPanels = [...document.querySelectorAll('.distro-panel')];

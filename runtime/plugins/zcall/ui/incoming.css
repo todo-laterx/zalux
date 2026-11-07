@@ -40,7 +40,7 @@ img { -webkit-user-drag: none; }
   overflow: hidden;
   background:
     radial-gradient(90% 70% at 50% -10%, #6aa8ff 0%, var(--blue-1) 38%, var(--blue-2) 72%, var(--blue-3) 100%);
-  -webkit-app-region: drag;
+  -webkit-app-region: no-drag;
 }
 
 .glow {
@@ -62,6 +62,7 @@ img { -webkit-user-drag: none; }
   align-items: center;
   justify-content: space-between;
   z-index: 2;
+  -webkit-app-region: drag;
 }
 
 .kind {
@@ -119,6 +120,17 @@ button:focus-visible {
   gap: 4px;
   padding: 6px 0 8px;
   z-index: 2;
+  -webkit-app-region: no-drag;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card.qr-open .caller {
+  transform: scale(0.93) translateY(-4px);
+  opacity: 0.22;
+  filter: blur(4px);
 }
 
 .avatar-ring {
@@ -168,18 +180,180 @@ button:focus-visible {
 
 /* ------------------------------------------------------------ actions */
 .actions {
+  position: relative;
   flex: 0 0 auto;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   gap: 20px;
   padding-bottom: 2px;
-  z-index: 2;
+  z-index: 10;
   -webkit-app-region: no-drag;
 }
 
+.reject-wrap {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.qr-popover {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  width: min(334px, calc(100vw - 20px));
+  padding: 8px;
+  border-radius: 15px;
+  background: rgba(13, 20, 31, .92);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, .18);
+  box-shadow:
+    0 20px 46px rgba(4, 9, 18, .58),
+    inset 0 1px 0 rgba(255, 255, 255, .16);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, 10px) scale(.92);
+  transform-origin: 76% 100%;
+  transition:
+    opacity 170ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 210ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 170ms;
+  z-index: 20;
+  -webkit-app-region: no-drag;
+}
+
+.qr-popover * {
+  -webkit-app-region: no-drag;
+}
+
+/* Cầu nối hover chỉ lấp đúng khe hở 8px giữa đáy popover và đỉnh .actions, không đè vào nút */
+.qr-popover::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -9px;
+  height: 9px;
+}
+
+.qr-popover.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.qr-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, .09);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .25px;
+  color: rgba(215, 230, 255, .82);
+}
+
+.qr-head svg {
+  flex: 0 0 auto;
+  color: #63a4ff;
+}
+
+.qr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5px;
+  max-height: 152px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.qr-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, .04);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .055);
+  color: #f2f7ff;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.28;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(5px);
+  transition:
+    opacity 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 120ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 120ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.qr-popover.is-open .qr-item {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(var(--stagger-idx, 0) * 20ms);
+}
+
+.qr-item span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qr-item svg {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  opacity: .35;
+  transform: translateX(-2px);
+  color: #ff8592;
+  transition:
+    opacity 130ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 130ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .qr-item:hover {
+    background: rgba(255, 77, 94, .24);
+    border-color: rgba(255, 120, 134, .36);
+    color: #ffffff;
+    transform: translateX(2px);
+    transition-delay: 0ms;
+  }
+  .qr-item:hover svg {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.qr-item:active {
+  transform: scale(.975);
+  transition-delay: 0ms;
+}
+
+.qr-item.is-sending {
+  background: rgba(34, 197, 94, .26);
+  border-color: rgba(74, 222, 128, .45);
+  color: #ffffff;
+}
+
 .action {
-  width: 82px;
+  position: relative;
+  z-index: 30;
+  width: 86px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -189,6 +363,7 @@ button:focus-visible {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+  -webkit-app-region: no-drag;
 }
 
 .action .disc {

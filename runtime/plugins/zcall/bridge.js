@@ -863,11 +863,277 @@ function registerIpcHandlers() {
     sendToEngine({ action: 'accept', camStartOff });
   });
 
+  // Lấy webpack require chỉ đọc từ window.webpackJsonp (không phụ thuộc dev-inspector).
+  const GET_WEBPACK_REQ_EXPR = `(() => {
+    if (window.__zaluxWebpackRequire && window.__zaluxWebpackRequire.c) return window.__zaluxWebpackRequire;
+    const wp = window.webpackJsonp;
+    if (!Array.isArray(wp) || typeof wp.push !== 'function') return null;
+    let req = null;
+    try {
+      const modId = '__zalux_wp_' + Date.now();
+      wp.push([[999998], { [modId]: function (_e, _t, r) { req = r; } }, [[modId]]]);
+    } catch (_) {}
+    if (req && req.c) window.__zaluxWebpackRequire = req;
+    return (req && req.c) ? req : null;
+  })()`;
+
+  const DEFAULT_QUICK_REPLIES = [
+    'Anh/em đang bận chút, lát gọi lại nhé!',
+    'Đang trong cuộc họp, nhắn tin giúp mình nhé.',
+    'Hiện không tiện nghe máy, có việc gì gấp không ạ?',
+    'Đang ngoài đường ồn quá, lát về mình gọi lại nha.',
+  ];
+
+  function readQuickReplyConfig() {
+    try {
+      const cfgPath = path.join(app.getPath('userData'), 'za-setup.json');
+      if (fs.existsSync(cfgPath)) {
+        const parsed = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+        const qr = parsed && parsed.quickReply;
+        if (qr && typeof qr === 'object') {
+          const enabled = qr.enabled !== undefined ? Boolean(qr.enabled) : true;
+          const items = Array.isArray(qr.items)
+            ? qr.items.map((s) => String(s || '').trim().slice(0, 160)).filter(Boolean).slice(0, 5)
+            : [...DEFAULT_QUICK_REPLIES];
+          return { enabled, items };
+        }
+      }
+    } catch (_) {}
+    return { enabled: true, items: [...DEFAULT_QUICK_REPLIES] };
+  }
+
+  function sendQuickReplyToCaller(peerId, peerName, replyText) {
+    const cleanText = String(replyText || '').trim();
+    if (!cleanText) return;
+    const mainWin = findMainAppWindow();
+    if (!mainWin || !isAlive(mainWin)) return;
+    const code = `(async () => {
+      try {
+        const req = ${GET_WEBPACK_REQ_EXPR};
+        if (!req) return { error: 'no-webpack' };
+        let targetId = ${JSON.stringify(String(peerId || '').trim())};
+        const targetName = ${JSON.stringify(String(peerName || '').trim())};
+        const msgText = ${JSON.stringify(cleanText)};
+
+        if (!targetId && targetName) {
+          const matchName = (s) => typeof s === 'string' && s.trim() === targetName;
+          try {
+            const jwy6Mod = req.c['JWY6'] && req.c['JWY6'].exports;
+            const jwy6 = jwy6Mod && (jwy6Mod.a || jwy6Mod.default || jwy6Mod);
+            if (jwy6) {
+              if (!targetId && jwy6._aliasName && typeof jwy6._aliasName === 'object') {
+                for (const uid of Object.keys(jwy6._aliasName)) {
+                  const al = jwy6._aliasName[uid];
+                  if (matchName(al) || (al && matchName(al.alias || al.aliasName))) {
+                    targetId = String(uid);
+                    break;
+                  }
+                }
+              }
+              if (!targetId && jwy6._cacheProfileInfo && typeof jwy6._cacheProfileInfo === 'object') {
+                for (const uid of Object.keys(jwy6._cacheProfileInfo)) {
+                  const info = jwy6._cacheProfileInfo[uid];
+                  if (info && (matchName(info.displayName) || matchName(info.zaloName) || matchName(info.dName) || matchName(info.zName))) {
+                    targetId = String(info.userId || uid);
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (_) {}
+
+          if (!targetId) {
+            try {
+              const kibvMod = req.c['kibv'] && req.c['kibv'].exports;
+              const kibv = kibvMod && (kibvMod.a || kibvMod.default || kibvMod);
+              const convs = kibv && kibv.convsList;
+              if (Array.isArray(convs)) {
+                for (const c of convs) {
+                  if (c && !c.isGroup && (matchName(c.displayName) || matchName(c.dName) || matchName(c.zName))) {
+                    targetId = String(c.convId || c.userId || '');
+                    if (targetId) break;
+                  }
+                }
+              }
+            } catch (_) {}
+          }
+
+          if (!targetId) {
+            try {
+              for (const modKey of Object.keys(req.c || {})) {
+                const m = req.c[modKey] && req.c[modKey].exports;
+                if (!m) continue;
+                for (const cand of [m, m.a, m.default]) {
+                  if (!cand || typeof cand !== 'object') continue;
+                  const profMap = cand._cacheProfileInfo || cand._cacheMiniInfo || cand._cacheProfile || cand.cacheInfoSearch;
+                  if (profMap && typeof profMap === 'object') {
+                    for (const k of Object.keys(profMap)) {
+                      const info = profMap[k];
+                      if (info && (matchName(info.displayName) || matchName(info.zaloName) || matchName(info.dName) || matchName(info.zName) || matchName(info.name))) {
+                        targetId = String(info.userId || info.id || k);
+                        break;
+                      }
+                    }
+                  }
+                  if (targetId) break;
+                }
+                if (targetId) break;
+              }
+            } catch (_) {}
+          }
+        }
+
+        if (!targetId) return { error: 'no-target-id', targetName };
+
+        // Tìm root component (#app-page) để gửi ngầm tin nhắn mà KHÔNG chuyển đổi hay đụng vào hội thoại đang mở trên UI
+        let rootComp = null;
+        try {
+          const appPage = document.getElementById('app-page');
+          if (appPage) {
+            for (const k of Object.keys(appPage)) {
+              if (k.startsWith('__reactInternalInstance') || k.startsWith('__reactFiber')) {
+                let cur = appPage[k];
+                while (cur) {
+                  if (cur.stateNode && cur.stateNode.mainChatboxController) {
+                    rootComp = cur.stateNode;
+                    break;
+                  }
+                  cur = cur.return;
+                }
+                break;
+              }
+            }
+          }
+        } catch (_) {}
+
+        if (rootComp && rootComp.mainChatboxController) {
+          const ctrl = rootComp.mainChatboxController;
+          try {
+            const weMod = req('UiPd');
+            const we = weMod && (weMod.default || weMod.a || weMod);
+            let convObj = we && typeof we.getProfileFriendSync === 'function' ? we.getProfileFriendSync(String(targetId)) : null;
+            if (!convObj && rootComp.storage && typeof rootComp.storage.getConversation === 'function') {
+              try {
+                convObj = await rootComp.storage.getConversation(String(targetId));
+              } catch (_) {}
+            }
+            if (!convObj || typeof convObj !== 'object') {
+              convObj = { userId: String(targetId), displayName: targetName || String(targetId), isGroup: false };
+            } else if (!convObj.userId) {
+              convObj = Object.assign({}, convObj, { userId: String(targetId) });
+            }
+
+            // Ưu tiên 1: Khởi tạo trực tiếp MessageObject + _showLocalMessage + sendMsgObject + _sentMessage
+            // Giúp gửi hoàn toàn ngầm qua API/WS, lưu SQLite/IndexedDB + cập nhật Sidebar mà không đóng popup/menu hay đụng tới khung chat đang mở
+            if (typeof ctrl._showLocalMessage === 'function' && typeof ctrl._sentMessage === 'function') {
+              const B = req('4HQc');
+              const L = req('1pet');
+              const pMod = req('z0WU');
+              const p = pMod && (pMod.default || pMod.a || pMod);
+              const idGenMod = req('NMlV');
+              const idGen = idGenMod && (idGenMod.a || idGenMod.default || idGenMod);
+              const hMod = req('dThN');
+              const h = hMod && (hMod.default || hMod.a || hMod);
+              const AMod = req('GpwQ');
+              const e2eeInst = AMod && AMod.a && typeof AMod.a.instance === 'function' ? AMod.a.instance() : null;
+              const myUid = (ctrl.user && ctrl.user.userId) || (rootComp.props && rootComp.props.user && rootComp.props.user.userId) || '';
+
+              if (B && typeof B.c === 'function' && B.a && p && typeof p.getMsgIdSendingFromCliMsgId === 'function' && idGen && typeof idGen.next === 'function' && h && typeof h.sendMsgObject === 'function' && myUid) {
+                const cliMsgId = idGen.next();
+                const msgId = p.getMsgIdSendingFromCliMsgId(cliMsgId);
+                const msgTextType = (L && L.MSG_TEXT) || 1;
+                const msgObj = new B.c(String(myUid), String(targetId), msgId, cliMsgId, msgTextType, false);
+                const isE2ee = Boolean(e2eeInst && typeof e2eeInst.isOnE2ee === 'function' && e2eeInst.isOnE2ee(String(targetId)));
+                if (isE2ee && L && L.MSG_E2EE) {
+                  msgObj.e2eeStatus = L.MSG_E2EE;
+                }
+                msgObj.updateMessageContentProp(B.a.TEXT, msgText);
+                try {
+                  const kt = req('NWd+');
+                  if (kt && typeof kt.a === 'function') {
+                    kt.a().addJustAddedMessage(String(targetId), { fromUid: '0', toUid: String(targetId), cliMsgId, src: 'just-sent' });
+                  }
+                } catch (_) {}
+                try {
+                  const Yt = req('HvYi');
+                  if (Yt && Yt.a && typeof Yt.a.getInstance === 'function') {
+                    Yt.a.getInstance().cacheFromLocalMessageObjectIfNeeded(msgObj);
+                  }
+                } catch (_) {}
+
+                ctrl._showLocalMessage(msgObj, convObj);
+                const doSend = () => h.sendMsgObject(
+                  msgObj,
+                  null,
+                  null,
+                  (L && L.RETRY_MSG_TIMEOUT_DEFAULT) || undefined,
+                  false,
+                  { shouldParseLinkOrContact: false }
+                ).then((resp) => {
+                  ctrl._sentMessage(msgObj, resp);
+                  return resp;
+                });
+
+                if (isE2ee && e2eeInst && typeof e2eeInst.sendMessageE2ee === 'function') {
+                  await e2eeInst.sendMessageE2ee(String(targetId), msgObj.msgId, doSend);
+                } else {
+                  await doSend();
+                }
+                return { ok: true, via: 'bg-sendMsgObject', targetId, cliMsgId };
+              }
+            }
+
+            // Ưu tiên 2: Gọi _sendMessage với shouldOpenConv=false, clearBox=false, clearSuggest=false, shouldFocus=false
+            if (typeof ctrl._sendMessage === 'function') {
+              const L = req('1pet');
+              const msgTextType = (L && L.MSG_TEXT) || 1;
+              await ctrl._sendMessage(convObj, msgTextType, msgText, false, null, null, false, null, false, false, false);
+              return { ok: true, via: 'bg-_sendMessage', targetId };
+            }
+          } catch (_) {}
+        }
+
+        try {
+          const fbup = req('fBUP');
+          const nmlv = req('NMlV');
+          const api = fbup && (fbup.default || fbup.a || fbup);
+          const idGen = nmlv && (nmlv.a || nmlv.default || nmlv);
+          if (api && typeof api.sendZText === 'function' && idGen && typeof idGen.next === 'function') {
+            api.sendZText(targetId, msgText, false, idGen.next());
+            return { ok: true, via: 'sendZText', targetId };
+          }
+        } catch (_) {}
+
+        return { error: 'no-sender', targetId };
+      } catch (e) {
+        return { error: String((e && e.message) || e) };
+      }
+    })()`;
+    mainWin.webContents.executeJavaScript(code, true).catch(() => {});
+  }
+
   ipcMain.on('zcall-ui-action', (_event, payload) => {
     if (!payload || typeof payload !== 'object') return;
+    const isGroupCall = Boolean(currentState && currentState.group);
+    const peerId = String(
+      payload.peerId ||
+      (!isGroupCall && currentState && (currentState.peerId || currentState.uidN || currentState.fromId)) ||
+      ''
+    );
+    const peerName = String(
+      payload.peerName ||
+      (!isGroupCall && currentState && currentState.name) ||
+      ''
+    );
+    const quickReply = payload.action === 'reject' && typeof payload.quickReply === 'string'
+      ? payload.quickReply.trim()
+      : '';
     sendToEngine(payload);
     if (payload.action === 'reject' || payload.action === 'hangup') {
       closeLocalCallNow();
+      if (quickReply && !isGroupCall) {
+        sendQuickReplyToCaller(peerId, peerName, quickReply);
+      }
     }
   });
 
@@ -895,20 +1161,6 @@ function registerIpcHandlers() {
     if (!isAlive(callWin) || event.sender !== callWin.webContents) return;
     focusMainAppWindow();
   });
-
-  // Lấy webpack require chỉ đọc từ window.webpackJsonp (không phụ thuộc dev-inspector).
-  const GET_WEBPACK_REQ_EXPR = `(() => {
-    if (window.__zaluxWebpackRequire && window.__zaluxWebpackRequire.c) return window.__zaluxWebpackRequire;
-    const wp = window.webpackJsonp;
-    if (!Array.isArray(wp) || typeof wp.push !== 'function') return null;
-    let req = null;
-    try {
-      const modId = '__zalux_wp_' + Date.now();
-      wp.push([[999998], { [modId]: function (_e, _t, r) { req = r; } }, [[modId]]]);
-    } catch (_) {}
-    if (req && req.c) window.__zaluxWebpackRequire = req;
-    return (req && req.c) ? req : null;
-  })()`;
 
   // Lấy danh sách **thành viên nhóm** (kèm avatar) từ cửa sổ Zalo chính
   // để mời thêm vào cuộc gọi nhóm đang diễn ra.
@@ -1168,6 +1420,11 @@ function registerIpcHandlers() {
   ipcMain.handle('zcall-ui-sounds', async () => {
     const res = await queryEngine('querySounds', null);
     return res || {};
+  });
+
+  try { ipcMain.removeHandler('zcall-ui-quick-replies'); } catch (_) {}
+  ipcMain.handle('zcall-ui-quick-replies', async () => {
+    return readQuickReplyConfig();
   });
 
   ipcMain.handle('zcall-ui-screen-source', async () => {

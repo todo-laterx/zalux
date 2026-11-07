@@ -38,6 +38,7 @@
     get: () => ipcRenderer.invoke('za-setup:get'),
     setRingtone: (file) => ipcRenderer.invoke('za-setup:set-ringtone', file),
     setNoti: (file) => ipcRenderer.invoke('za-setup:set-noti', file),
+    setQuickReply: (patch) => ipcRenderer.invoke('za-setup:set-quick-reply', patch),
     updateBadge: (count) => ipcRenderer.send('za-badge:update', count),
   };
 

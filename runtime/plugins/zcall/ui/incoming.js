@@ -21,6 +21,7 @@
   function $(id) { return document.getElementById(id); }
 
   var el = {
+    card: $('card'),
     peerAvatar: $('peerAvatar'),
     peerName: $('peerName'),
     peerText: $('peerText'),
@@ -30,6 +31,9 @@
     labelAcceptAudio: $('labelAcceptAudio'),
     btnReject: $('btnReject'),
     btnRejectTop: $('btnRejectTop'),
+    rejectWrap: $('rejectWrap'),
+    qrPopover: $('qrPopover'),
+    qrList: $('qrList'),
     iconAcceptNoCam: $('iconAcceptNoCam'),
     svgAcceptPhone: $('svgAcceptPhone'),
     iconAcceptVideo: $('iconAcceptVideo'),
@@ -40,6 +44,103 @@
   var ringtone = null;
   var ringing = false;
   var soundUrls = {};
+  var quickReplyCfg = {
+    enabled: true,
+    items: [
+      'Anh/em đang bận chút, lát gọi lại nhé!',
+      'Đang trong cuộc họp, nhắn tin giúp mình nhé.',
+      'Hiện không tiện nghe máy, có việc gì gấp không ạ?',
+      'Đang ngoài đường ồn quá, lát về mình gọi lại nha.',
+    ],
+  };
+  var qrHoverTimer = null;
+
+  function canShowQuickReply() {
+    return Boolean(
+      !state.group &&
+      quickReplyCfg &&
+      quickReplyCfg.enabled &&
+      Array.isArray(quickReplyCfg.items) &&
+      quickReplyCfg.items.length > 0
+    );
+  }
+
+  function renderQuickReplies() {
+    if (!el.qrPopover || !el.qrList) return;
+    var rejectLbl = el.btnReject && el.btnReject.querySelector('.label');
+    if (!canShowQuickReply()) {
+      el.qrPopover.classList.remove('is-open');
+      el.qrPopover.classList.add('hidden');
+      if (el.card) el.card.classList.remove('qr-open');
+      if (rejectLbl) rejectLbl.textContent = 'Từ chối';
+      el.qrList.innerHTML = '';
+      return;
+    }
+    if (rejectLbl) rejectLbl.textContent = 'Từ chối ▴';
+    el.qrPopover.classList.remove('hidden');
+    el.qrList.innerHTML = '';
+    var visibleItems = quickReplyCfg.items.slice(0, 5);
+    var total = visibleItems.length;
+    visibleItems.forEach(function (msgText, idx) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'qr-item';
+      btn.style.setProperty('--stagger-idx', String(Math.max(0, total - 1 - idx)));
+      btn.setAttribute('role', 'menuitem');
+      var span = document.createElement('span');
+      span.textContent = msgText;
+      btn.appendChild(span);
+      btn.insertAdjacentHTML(
+        'beforeend',
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>'
+      );
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        btn.classList.add('is-sending');
+        span.textContent = '✓ Đã gửi: ' + msgText;
+        rejectWithReply(msgText);
+      });
+      el.qrList.appendChild(btn);
+    });
+  }
+
+  function loadQuickReplies() {
+    if (!ipc) {
+      renderQuickReplies();
+      return;
+    }
+    ipc.invoke('zcall-ui-quick-replies').then(function (cfg) {
+      if (cfg && typeof cfg === 'object') {
+        quickReplyCfg = {
+          enabled: cfg.enabled !== undefined ? Boolean(cfg.enabled) : true,
+          items: Array.isArray(cfg.items) ? cfg.items : quickReplyCfg.items,
+        };
+      }
+      renderQuickReplies();
+    }).catch(function () {
+      renderQuickReplies();
+    });
+  }
+
+  function showQuickReplyPopover() {
+    if (qrHoverTimer) {
+      clearTimeout(qrHoverTimer);
+      qrHoverTimer = null;
+    }
+    if (!el.qrPopover || !canShowQuickReply()) return;
+    el.qrPopover.classList.remove('hidden');
+    el.qrPopover.classList.add('is-open');
+    if (el.card) el.card.classList.add('qr-open');
+  }
+
+  function scheduleHideQuickReplyPopover() {
+    if (qrHoverTimer) clearTimeout(qrHoverTimer);
+    qrHoverTimer = setTimeout(function () {
+      qrHoverTimer = null;
+      if (el.qrPopover) el.qrPopover.classList.remove('is-open');
+      if (el.card) el.card.classList.remove('qr-open');
+    }, 180);
+  }
 
   function icon(name) { return A.iconUrl(name); }
 
@@ -93,8 +194,26 @@
 
   function reject() {
     stopRingtone();
+    if (el.qrPopover) el.qrPopover.classList.remove('is-open');
+    if (el.card) el.card.classList.remove('qr-open');
     if (ipc) {
       try { ipc.send('zcall-ui-action', { action: 'reject' }); } catch (_) { /* main gone */ }
+    }
+  }
+
+  function rejectWithReply(quickReplyText) {
+    stopRingtone();
+    if (el.qrPopover) el.qrPopover.classList.remove('is-open');
+    if (el.card) el.card.classList.remove('qr-open');
+    if (ipc) {
+      try {
+        ipc.send('zcall-ui-action', {
+          action: 'reject',
+          quickReply: String(quickReplyText || '').trim(),
+          peerId: String((state && (state.peerId || state.uidN || state.fromId)) || '').trim(),
+          peerName: String((state && state.name) || (el.peerName && el.peerName.textContent) || '').trim(),
+        });
+      } catch (_) { /* main gone */ }
     }
   }
 
@@ -150,6 +269,7 @@
     if (el.labelAcceptAudio) el.labelAcceptAudio.textContent = isVideo ? 'Không mở camera' : 'Trả lời';
 
     document.title = 'Zalux: ' + (s.name || 'cuộc gọi đến');
+    loadQuickReplies();
     startRingtone();
   }
 
@@ -185,7 +305,19 @@
   if (el.btnAcceptAudio) {
     el.btnAcceptAudio.addEventListener('click', function () { answer(!!state.video); });
   }
-  if (el.btnReject) el.btnReject.addEventListener('click', reject);
+  if (el.rejectWrap) {
+    el.rejectWrap.addEventListener('mouseenter', showQuickReplyPopover);
+    el.rejectWrap.addEventListener('mouseleave', scheduleHideQuickReplyPopover);
+  }
+  if (el.btnReject) {
+    el.btnReject.addEventListener('click', reject);
+    el.btnReject.addEventListener('mouseenter', showQuickReplyPopover);
+    el.btnReject.addEventListener('focus', showQuickReplyPopover);
+  }
+  if (el.qrPopover) {
+    el.qrPopover.addEventListener('mouseenter', showQuickReplyPopover);
+    el.qrPopover.addEventListener('mouseleave', scheduleHideQuickReplyPopover);
+  }
   if (el.btnRejectTop) el.btnRejectTop.addEventListener('click', reject);
 
   document.addEventListener('keydown', function (e) {
@@ -198,6 +330,7 @@
   if (el.peerAvatar) el.peerAvatar.src = icon('zalo_logo.png');
 
   loadSoundUrls();
+  loadQuickReplies();
 
   // Exposed for a smoke test / screenshot without an engine.
   window.ZCallIncoming = {

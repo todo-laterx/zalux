@@ -45,14 +45,26 @@
         <span class="label">Trả lời video</span>
       </button>
 
-      <button class="action reject" id="btnReject" title="Từ chối">
-        <span class="disc">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 9c-3.9 0-7.43 1.44-10.14 3.81-.38.33-.42.9-.08 1.28l2.14 2.4c.31.35.84.4 1.21.12.88-.67 1.86-1.2 2.91-1.57.42-.15.7-.54.7-.99V11.6c1.05-.35 2.17-.54 3.26-.54s2.21.19 3.26.54v2.45c0 .45.28.84.7.99 1.05.37 2.03.9 2.91 1.57.37.28.9.23 1.21-.12l2.14-2.4c.34-.38.3-.95-.08-1.28C19.43 10.44 15.9 9 12 9z"/>
-          </svg>
-        </span>
-        <span class="label">Từ chối</span>
-      </button>
+      <div class="reject-wrap" id="rejectWrap">
+        <div class="qr-popover hidden" id="qrPopover" role="menu" aria-label="Từ chối và gửi tin nhắn nhanh">
+          <div class="qr-head">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>Từ chối &amp; gửi tin nhắn nhanh</span>
+          </div>
+          <div class="qr-list" id="qrList"></div>
+        </div>
+
+        <button class="action reject" id="btnReject" title="Từ chối (Rê chuột để gửi phản hồi nhanh)">
+          <span class="disc">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 9c-3.9 0-7.43 1.44-10.14 3.81-.38.33-.42.9-.08 1.28l2.14 2.4c.31.35.84.4 1.21.12.88-.67 1.86-1.2 2.91-1.57.42-.15.7-.54.7-.99V11.6c1.05-.35 2.17-.54 3.26-.54s2.21.19 3.26.54v2.45c0 .45.28.84.7.99 1.05.37 2.03.9 2.91 1.57.37.28.9.23 1.21-.12l2.14-2.4c.34-.38.3-.95-.08-1.28C19.43 10.44 15.9 9 12 9z"/>
+            </svg>
+          </span>
+          <span class="label">Từ chối</span>
+        </button>
+      </div>
     </div>
   </div>
 

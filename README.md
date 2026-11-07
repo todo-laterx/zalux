@@ -20,9 +20,9 @@
 
 ## Giới thiệu
 
-**Zalux** đưa trải nghiệm Zalo quen thuộc chạy trực tiếp trên Linux Electron kết hợp cùng **Call Engine 1:1 / Nhóm và 9 module hệ thống viết mới hoàn toàn từ đầu bằng Rust (`zcall-engine`, `zalo-asar` và 9 N-API `.node` addons)**.
+**Zalux** giữ trọn trải nghiệm Zalo quen thuộc bạn dùng mỗi ngày trên Linux, kết hợp cùng **nhân gọi thoại, video nhóm và 9 module hệ thống được viết mới hoàn toàn từ đầu bằng Rust (`zcall-engine`, `zalo-asar` và 9 N-API `.node` addons)**.
 
-> **Kiến trúc Độc lập (100% In-House Clean-Room):** Toàn bộ tầng xử lý cuộc gọi 1:1 & nhóm (`zcall-engine`), chia sẻ màn hình `PipeWire`/`OpenH264`, trình đóng gói `zalo-asar`, 9 thư viện `.node` biên dịch cho Linux, bộ công cụ vá bundle Python và giao diện `plugins/{zcall,zalux}` đều được tự thiết kế và viết riêng từ đầu — **hoàn toàn không phụ thuộc, không kế thừa và không sử dụng bất kỳ mã nguồn/userscript MIT của dự án cộng đồng bên thứ ba nào**.
+> **Kiến trúc Rust Độc lập (Clean-Room):** Toàn bộ hệ thống xử lý cuộc gọi 1:1 & họp nhóm (`zcall-engine`), chia sẻ màn hình `PipeWire`/`OpenH264`, trình đóng gói `zalo-asar`, 9 thư viện `.node` biên dịch riêng cho Linux và bộ giao diện `plugins/{zcall,zalux}` đều được tự thiết kế từ đầu — giúp ứng dụng vận hành mượt mà, ổn định và không cần qua lớp giả lập Wine.
 
 ---
 
@@ -60,18 +60,21 @@
 ## Kiến trúc & Cải tiến Kỹ thuật
 
 1. **Rust ZRTC 1:1 & Zavi SFU Group Call Engine (`zcall-engine`)**:
-   - Xử lý trực tiếp giao thức báo hiệu 1:1 & hội nghị nhóm Zavi SFU, bắt tay Relay/P2P, mã hoá SRTP hai chiều, RTCP TWCC/SR/PLI và thu phát âm thanh Opus 16 kHz qua `PipeWire`/`PulseAudio`.
-   - **Video 1:1 HD & Đa Codec**: Luồng gửi (`tx`) mã hoá `1280×720 @ 24fps` (`1.2 Mbps`), đóng gói ZRTC `1140` byte/mảnh (`PT 98` Keyframe / `PT 97` Delta), tự động khôi phục camera & `VideoEncoder` khi gián đoạn; luồng nhận (`rcv`) giải mã độ trễ 0 khung hình cả **H.264 (`PT 97/98`)** lẫn **HEVC (`PT 121/122`)** qua `libavcodec` (`low_delay`).
+   - Đảm nhiệm trọn vẹn kết nối gọi 1:1 và gọi nhóm Zavi, bảo mật luồng truyền bằng mã hoá SRTP hai chiều và thu phát âm thanh Opus 16 kHz trong trẻo qua `PipeWire` / `PulseAudio`.
+   - **Video 1:1 HD sắc nét**: Truyền hình ảnh `1280×720 @ 24fps`, giải mã trực tiếp cả **H.264** lẫn **HEVC** không độ trễ và tự động kết nối lại camera khi thiết bị gián đoạn.
    - **Họp Nhóm Kiểu Zoom**: Chuyển đổi mượt giữa **Chế độ Lưới (`Gallery`)** và **Người nói (`Speaker View`)**, ghim người nói, tự khớp tỉ lệ khung hình riêng (camera PC `16:9` đi cùng điện thoại dọc `9:16` không biến dạng), phân trang khi đông người, xem danh sách thành viên và mời thêm bạn trực tiếp vào phòng.
-   - **Chia sẻ màn hình Native Linux**: Tích hợp `xdg-desktop-portal` ScreenCast + `PipeWire` (`MemFd`) + mã hoá `OpenH264` (`1.5 Mbps @ 15fps`) chạy trên luồng riêng trong Rust (không cần GPU encoder), tự động chuyển tiếp mượt về hộp chọn đa màn hình có ảnh xem trước khi cần.
-   - **Điều khiển thiết bị thông minh**: Thanh trượt chỉnh âm lượng micro trực tiếp, tự lọc bỏ thiết bị âm thanh ảo và camera hồng ngoại (IR), hỗ trợ nhận cuộc gọi video tắt sẵn camera (`camStartOff`).
+   - **Chia sẻ màn hình mượt trên cả Wayland & X11**: Kết hợp `PipeWire` và bộ mã hoá `OpenH264` chạy độc lập trong Rust (không phụ thuộc card đồ hoạ rời), đi kèm hộp chọn màn hình/cửa sổ có ảnh xem trước trực quan.
+   - **Điều khiển thiết bị thông minh**: Thanh trượt chỉnh âm lượng micro trực tiếp, tự lọc bỏ thiết bị âm thanh ảo và camera hồng ngoại (IR), đồng thời hỗ trợ chủ động nhận cuộc gọi video ở chế độ tắt sẵn camera.
 2. **9 Module Native N-API bằng Rust (`runtime/nativelibs/`)**:
-   - Thay thế toàn bộ addon gốc của macOS bằng bản biên dịch ELF64 Linux `x86_64` tối ưu: `node_sqlite3` (tích hợp tĩnh `libsqlite3` + FTS3/FTS5/RTree/WAL), `db-cross-v4` (giải mã AES + LZMA/zstd cho đồng bộ lịch sử đa thiết bị), `zjxl` (giải mã/mã hoá ảnh JPEG XL), `zimage`, `mp4thumb`, `file-utils`, `file-utilities`, `zwalker` (quét & dọn dung lượng dữ liệu), `zlang` (nhận diện ngôn ngữ tin nhắn).
+   - Toàn bộ 9 thư viện hệ thống đều được viết mới bằng Rust và biên dịch trực tiếp cho Linux `x86_64`: `node_sqlite3` (cơ sở dữ liệu tin nhắn & tìm kiếm nhanh FTS5), `db-cross-v4` (giải mã & đồng bộ lịch sử trò chuyện giữa các thiết bị), `zjxl` (hiển thị ảnh JPEG XL), `zimage`, `mp4thumb` (tạo ảnh thu nhỏ video), `file-utils`, `file-utilities`, `zwalker` (quét & dọn dẹp bộ nhớ đệm) và `zlang` (nhận diện ngôn ngữ).
 3. **Tích hợp Sâu Môi trường Desktop Linux**:
-   - **System Tray & Unread Badge**: Khay hệ thống hiển thị số tin nhắn chưa đọc thời gian thực, đồng bộ huy hiệu với Dock/Taskbar (`zalux.desktop`).
-   - **XWayland / Wayland & Dark Frame Sync**: Tự động ưu tiên XWayland ổn định cho định vị cửa sổ và khay hệ thống trên GNOME/KDE (hỗ trợ `--wayland` khi muốn chạy Wayland thuần), đồng bộ viền cửa sổ tối (`_GTK_THEME_VARIANT=dark`) và dán ảnh/tệp trực tiếp qua `wl-paste` / `xclip`.
-4. **Bảng điều khiển Zalux (Quyền riêng tư & Âm thanh)**:
-   - Tích hợp ngay trên thanh điều hướng trái (`Ctrl+Shift+P`): chủ động bật/tắt ẩn trạng thái **“đang soạn tin”**, **“đã nhận”**, **“đã xem”** (chặn trực tiếp trên máy trước khi gửi lên máy chủ); nghe thử và đổi tức thì **12 nhạc chuông cuộc gọi** cùng **14 âm thông báo tin nhắn**.
+   - **System Tray & Thanh Dock**: Biểu tượng khay hệ thống và thanh Dock hiển thị trực tiếp số tin nhắn chưa đọc theo thời gian thực (`zalux.desktop`).
+   - **Tương thích GNOME / KDE (Wayland & X11)**: Tự động đồng bộ viền cửa sổ tối theo giao diện hệ thống (`_GTK_THEME_VARIANT=dark`), dán ảnh/tệp nhanh từ clipboard qua `wl-paste` / `xclip` và vận hành ổn định trên cả XWayland lẫn Wayland thuần (`--wayland`).
+4. **Bảng điều khiển Zalux Studio (Quyền riêng tư, Âm thanh & Phản hồi nhanh khi bận)**:
+   - Mở nhanh từ thanh điều hướng trái hoặc phím tắt `Ctrl+Shift+P` với 3 thẻ trực quan:
+     - **Riêng tư**: Toàn quyền kiểm soát trạng thái **“Đang soạn tin”**, **“Đã nhận”** và **“Đã xem”** (chặn tín hiệu ngay trên máy bạn trước khi gửi đi).
+     - **Âm thanh**: Kho **12 nhạc chuông cuộc gọi** và **14 âm báo tin nhắn** tinh gọn; nghe thử trực tiếp với hiệu ứng sóng nhạc sống động và đổi âm báo chỉ với một cú nhấp.
+     - **Phản hồi nhanh**: Tuỳ biến sẵn tối đa 5 câu trả lời mẫu; khi đang họp hoặc không tiện nghe máy, chỉ cần rê chuột vào nút **Từ chối ▴** để chọn lời nhắn — cuộc gọi được từ chối lịch sự và tin nhắn tự động gửi ngay vào khung chat của người gọi.
 
 ---
 
@@ -79,16 +82,16 @@
 
 Việc viết mới toàn bộ Call Engine và 9 thư viện hệ thống bằng **Rust** giúp loại bỏ hoàn toàn ứng dụng phụ `ZaloHelper.app / ZaloCall` (C++ / Qt5 Widgets + Multimedia nặng nề trên macOS/Windows) cũng như tránh lớp dịch Wine tốn kém trên Linux.
 
-Dưới đây là số liệu đo đạc thực tế qua `/proc/<pid>/smaps_rollup` trên phiên làm việc thực (Ubuntu Wayland/XWayland, đã tải cơ sở dữ liệu lịch sử chat lớn):
+Dưới đây là số liệu đo thực tế qua `/proc/<pid>/smaps_rollup` trên Ubuntu khi đăng nhập tài khoản có lịch sử trò chuyện lớn và mở dùng liên tục:
 
 | Thành phần | Bản gốc (macOS/Windows) hoặc chạy qua Wine | Zalux trên Linux (Native Rust) |
 |---|---|---|
 | **Daemon Call Engine chạy nền (`idle`)** | `ZaloCall` C++/Qt5: **~80 – 150 MB RSS** | `zcall-engine` (Rust thuần, không GUI runtime): **~3.4 MB PSS** (~5.8 MB RSS) |
-| **Giải mã Video H.264/HEVC trực tiếp** | Phụ thuộc tiến trình phụ nặng | `zcall-engine --decode-pipe`: **~6.0 MB PSS** (~12.0 MB RSS, độ trễ 0 frame) |
+| **Giải mã Video H.264/HEVC trực tiếp** | Phụ thuộc tiến trình giao diện phụ nặng nề | `zcall-engine --decode-pipe`: **~6.0 MB PSS** (~12.0 MB RSS, độ trễ 0 frame) |
 | **Bộ 9 thư viện Native N-API (`.node`)** | Nhiều dynamic library + framework rời | **~15.4 MB** tổng dung lượng trên đĩa sau khi `strip`, chạy in-process không GC pause |
 | **Tổng RAM toàn ứng dụng khi mở nhiều DB chat** | ~650 – 950 MB (+ **300 – 500 MB** nếu chạy qua Wine) | **~788 MB PSS** tổng cộng — trong đó Electron/Chromium + Zalo React UI chiếm **~778 MB PSS (~98.8%)**, toàn bộ tầng Rust của Zalux chỉ chiếm **< 1.2% (~3.4 – 9.4 MB PSS)** |
 
-> **Góc nhìn kỹ thuật trung thực:** Phần lớn RAM của ứng dụng đến từ nhân Electron/Chromium và bundle giao diện web của Zalo (~778 MB PSS khi mở nhiều cuộc trò chuyện lớn). Lợi thế cốt lõi của Rust trong Zalux nằm ở việc giữ cho **toàn bộ hệ thống gọi thoại/video/nhóm, chia sẻ màn hình PipeWire và 9 module I/O, SQLite, mã hoá chạy native trực tiếp trên Linux chỉ với vài MB bộ nhớ**, không rò rỉ RAM khi treo máy cả ngày và không kéo theo bất kỳ runtime phụ nào.
+> **Số liệu thực tế minh bạch:** Phần lớn bộ nhớ thuộc về giao diện web Electron của Zalo (~778 MB PSS khi mở nhiều cuộc trò chuyện lớn). Nhờ viết bằng Rust, toàn bộ nhân xử lý cuộc gọi thoại/video/nhóm, chia sẻ màn hình PipeWire và 9 module hệ thống của Zalux chỉ chiếm chưa tới 1.2% RAM — không rò rỉ bộ nhớ khi mở máy suốt ngày dài và không kéo theo bất kỳ tiến trình phụ nặng nề nào.
 
 ---
 
@@ -162,21 +165,27 @@ zalux/
 └── README.md  LICENSE  NOTICE  TRADEMARK.md  SECURITY.md  CHANGELOG.md  VERSION
 ```
 
-## Cửa sổ Cuộc gọi đến & Bảng Cài đặt Zalux
+## Cửa sổ Cuộc gọi đến & Bảng Cài đặt Zalux Studio
 
 <table>
   <tr>
-    <td width="34%" align="center" valign="middle">
-      <img src="assets/call-incoming.png" alt="Cửa sổ cuộc gọi video đến với tuỳ chọn nhận tắt sẵn camera"><br>
-      <sub><b>Cuộc gọi đến thông minh</b> — Nhận bật cam hoặc tắt sẵn camera</sub>
+    <td width="50%" align="center" valign="middle">
+      <img src="assets/call-incoming.png" alt="Cửa sổ cuộc gọi video đến với menu Từ chối & gửi tin nhắn nhanh và nút Không mở camera"><br>
+      <sub><b>Cuộc gọi đến &amp; Phản hồi nhanh</b> — Nhận cuộc gọi tắt sẵn camera hoặc rê chuột vào <b>Từ chối ▴</b> để gửi lời nhắn nhanh khi đang bận</sub>
     </td>
-    <td width="33%" align="center" valign="middle">
-      <img src="assets/setup-privacy.png" alt="Cài đặt Zalux - Chủ động quyền riêng tư"><br>
-      <sub><b>Chủ động quyền riêng tư</b> — Ẩn soạn tin, đã nhận, đã xem</sub>
+    <td width="50%" align="center" valign="middle">
+      <img src="assets/setup-privacy.png" alt="Zalux Studio - Chủ động quyền riêng tư"><br>
+      <sub><b>Zalux Studio · Riêng tư</b> — Chủ động ẩn trạng thái đang soạn tin, đã nhận và đã xem</sub>
     </td>
-    <td width="33%" align="center" valign="middle">
-      <img src="assets/setup.png" alt="Cài đặt Zalux - Nhạc chuông & Âm thông báo"><br>
-      <sub><b>Tuỳ biến âm thanh</b> — 12 nhạc chuông &amp; 14 âm thông báo</sub>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="middle">
+      <img src="assets/setup.png" alt="Zalux Studio - Nhạc chuông & Âm thông báo kèm sóng nhạc trực tiếp"><br>
+      <sub><b>Zalux Studio · Âm thanh</b> — 12 nhạc chuông &amp; 14 âm báo tin nhắn kèm hiệu ứng sóng nhạc nghe thử trực tiếp</sub>
+    </td>
+    <td width="50%" align="center" valign="middle">
+      <img src="assets/setup-quick-reply.png" alt="Zalux Studio - Quản lý câu phản hồi nhanh khi từ chối cuộc gọi"><br>
+      <sub><b>Zalux Studio · Phản hồi nhanh</b> — Tuỳ biến sẵn các câu trả lời lịch sự tự động gửi khi từ chối cuộc gọi</sub>
     </td>
   </tr>
 </table>

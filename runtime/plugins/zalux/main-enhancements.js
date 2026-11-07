@@ -754,12 +754,44 @@ function updateAdvancedSettingsRingtone(ringtoneAbsPath) {
   try { fs.writeFileSync(advPath, JSON.stringify(obj, null, 2)); } catch (_) {}
 }
 
+const DEFAULT_QUICK_REPLIES = [
+  'Anh/em đang bận chút, lát gọi lại nhé!',
+  'Đang trong cuộc họp, nhắn tin giúp mình nhé.',
+  'Hiện không tiện nghe máy, có việc gì gấp không ạ?',
+  'Đang ngoài đường ồn quá, lát về mình gọi lại nha.',
+];
+
+function normalizeQuickReply(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return { enabled: true, items: [...DEFAULT_QUICK_REPLIES] };
+  }
+  const enabled = raw.enabled !== undefined ? Boolean(raw.enabled) : true;
+  let items = [];
+  if (Array.isArray(raw.items)) {
+    items = raw.items
+      .map((s) => String(s || '').trim().slice(0, 160))
+      .filter(Boolean)
+      .slice(0, 5);
+  } else {
+    items = [...DEFAULT_QUICK_REPLIES];
+  }
+  return { enabled, items };
+}
+
 function setupSoundService() {
   const soundsDir = ensureUserSoundsDir();
   const cfgPath = path.join(app.getPath('userData'), 'za-setup.json');
-  const cfg = { ringtone: '', noti: '' };
+  const cfg = {
+    ringtone: '',
+    noti: '',
+    quickReply: { enabled: true, items: [...DEFAULT_QUICK_REPLIES] },
+  };
   try {
-    Object.assign(cfg, JSON.parse(fs.readFileSync(cfgPath, 'utf8')));
+    const loaded = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+    if (loaded && typeof loaded === 'object') {
+      Object.assign(cfg, loaded);
+      cfg.quickReply = normalizeQuickReply(loaded.quickReply);
+    }
   } catch (_) {}
 
   const save = () => {
@@ -832,17 +864,41 @@ function setupSoundService() {
     if (readyResolve) readyResolve();
   });
 
+  const syncQuickReplyFromDisk = () => {
+    try {
+      if (fs.existsSync(cfgPath)) {
+        const disk = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+        if (disk && typeof disk === 'object' && disk.quickReply) {
+          cfg.quickReply = normalizeQuickReply(disk.quickReply);
+          return;
+        }
+      }
+    } catch (_) {}
+    cfg.quickReply = normalizeQuickReply(cfg.quickReply);
+  };
+
   ipcMain.handle('za-setup:get', async () => {
     await ready;
+    syncQuickReplyFromDisk();
     return {
       sounds: {
         ringtone: listByPrefix('ringtone-'),
         noti: listByPrefix('noti-'),
       },
       current: { ...cfg },
+      quickReply: cfg.quickReply,
+      defaultQuickReplies: [...DEFAULT_QUICK_REPLIES],
       base: port ? `http://127.0.0.1:${port}/` : '',
       logo: getLogoDataUrl(),
     };
+  });
+
+  ipcMain.handle('za-setup:set-quick-reply', (_e, patch) => {
+    syncQuickReplyFromDisk();
+    const merged = Object.assign({}, cfg.quickReply, patch || {});
+    cfg.quickReply = normalizeQuickReply(merged);
+    save();
+    return { ...cfg, quickReply: cfg.quickReply };
   });
 
   ipcMain.handle('za-setup:set-ringtone', (_e, file) => {

@@ -260,8 +260,9 @@ def patch_pc_bundle(path: Path) -> int:
     )
     hits += n
 
-    # 8c. Hiển thị trực tiếp thẻ customMsg + nút CTA ("Tham gia") trong oJT1 cho tin nhắn ZInstant/Group Call
-    #     thay vì chờ <z-instant> lỗi hoặc treo ở trạng thái IDLE skeleton.
+    # 8c. Hiển thị trực tiếp thẻ customMsg + nút CTA ("Tham gia") trong oJT1 cho tin nhắn Group Call
+    #     thay vì chờ <z-instant> lỗi hoặc treo ở trạng thái IDLE skeleton, đồng thời giữ nguyên
+    #     luồng render <z-instant> đầy đủ cho các trang OA / tin nhắn Rich Card.
     idx_ojt1 = text.find("oJT1:function")
     if idx_ojt1 != -1:
         sub = text[idx_ojt1 : idx_ojt1 + 7500]
@@ -269,27 +270,50 @@ def patch_pc_bundle(path: Path) -> int:
         if not m_head:
             fail(f"{path.name}: không khớp RE_OJT1_HEAD trong oJT1")
         rog4_v, _, react_v, _ = m_head.groups()
-        fallback_expr = (
-            f"(()=>{{try{{const _md={rog4_v}.h.create(new {rog4_v}.h.Adapters.MessageEntity(e)).getZInstantMetadata(),"
-            "_cm=_md&&_md.customMsg||e&&e.message&&e.message.customMsg;if(!_cm||!_cm.msg)return null;"
-            'const _lg="undefined"!=typeof document&&"en"===document.documentElement.lang?"en":"vi";'
-            'let _tx="string"==typeof _cm.msg?_cm.msg:_cm.msg[_lg]||_cm.msg.vi||_cm.msg.en||"";'
-            "const _hl=Array.isArray(_cm.highLightsV2)?_cm.highLightsV2:Array.isArray(_cm.highLights)?_cm.highLights:[];"
-            'for(let _k=0;_k<_hl.length;_k++){const _it=_hl[_k],_lb="string"==typeof _it?_it:_it&&(_it.dpn||_it.name||_it.text)||"";'
-            '_tx=_tx.split("%"+(_k+1)+"$s").join(_lb).split("$"+(_k+1)+"$s").join(_lb)}'
-            "if(!_tx)return null;const _acts=Array.isArray(_cm.action)?_cm.action:[];"
-            f'return {react_v}.a.createElement("div",{{className:"flx flx-al-c flx-sp-btw _zaZinstCard",onContextMenu:t,'
-            'style:{padding:"10px 14px",borderRadius:"8px",background:"rgba(0,104,255,0.08)",gap:"12px",minWidth:"210px"}},'
-            f'{react_v}.a.createElement("span",{{style:{{fontSize:"13px",fontWeight:500,lineHeight:"18px"}}}},_tx),'
-            "_acts.map(((_ac,_ai)=>{if(!_ac)return null;"
-            'const _alb=_ac.actionLabelv2&&"object"==typeof _ac.actionLabelv2?_ac.actionLabelv2[_lg]||_ac.actionLabelv2.vi||_ac.actionLabel:_ac.actionLabel;'
-            f'return _alb?{react_v}.a.createElement("button",{{key:_ai,type:"button",className:"clickable",'
-            'style:{border:"none",borderRadius:"6px",padding:"5px 12px",background:"#0068ff",color:"#fff",fontSize:"12px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"},'
-            'onClick:_ev=>{_ev.stopPropagation(),_ev.preventDefault(),window.dispatchEvent(new CustomEvent("zalux:call-action",'
-            "{detail:{convId:e&&(e.toUid||e.idTo),msgId:e&&e.msgId,actionType:_ac.actionType,actionData:_ac.actionData}}))}},_alb):null})))"
-            "}catch(_ze){return null}})()"
-        )
-        if "_zaDirectCard" not in sub:
+
+        def make_card_expr(direct_only: bool) -> str:
+            cond_guard = (
+                "const _acts=Array.isArray(_cm.action)?_cm.action:[],"
+                "_hl=Array.isArray(_cm.highLightsV2)?_cm.highLightsV2:Array.isArray(_cm.highLights)?_cm.highLights:[],"
+                '_isCallAct=_acts.some((_a=>_a&&"string"==typeof _a.actionType&&(_a.actionType.includes("call")||"call_group"===_a.actionType))),'
+                '_isGrpConv=(""+(e&&(e.toUid||e.idTo)||"")).startsWith("g");'
+                "if(!_isCallAct&&!(_isGrpConv&&(_acts.length>0||_hl.length>0)))return null;"
+                if direct_only
+                else "const _acts=Array.isArray(_cm.action)?_cm.action:[],"
+                "_hl=Array.isArray(_cm.highLightsV2)?_cm.highLightsV2:Array.isArray(_cm.highLights)?_cm.highLights:[];"
+            )
+            return (
+                f"(()=>{{try{{const _md={rog4_v}.h.create(new {rog4_v}.h.Adapters.MessageEntity(e)).getZInstantMetadata(),"
+                "_cm=_md&&_md.customMsg||e&&e.message&&e.message.customMsg;if(!_cm||!_cm.msg)return null;"
+                + cond_guard
+                + 'const _lg="undefined"!=typeof document&&"en"===document.documentElement.lang?"en":"vi";'
+                + 'let _tx="string"==typeof _cm.msg?_cm.msg:_cm.msg[_lg]||_cm.msg.vi||_cm.msg.en||"";'
+                + 'for(let _k=0;_k<_hl.length;_k++){const _it=_hl[_k],_lb="string"==typeof _it?_it:_it&&(_it.dpn||_it.name||_it.text)||"";'
+                + '_tx=_tx.split("%"+(_k+1)+"$s").join(_lb).split("$"+(_k+1)+"$s").join(_lb)}'
+                + "if(!_tx)return null;"
+                + f'return {react_v}.a.createElement("div",{{className:"flx flx-al-c flx-sp-btw _zaZinstCard",onContextMenu:t,'
+                + 'style:{padding:"10px 14px",borderRadius:"8px",background:"rgba(0,104,255,0.08)",gap:"12px",minWidth:"210px"}},'
+                + f'{react_v}.a.createElement("span",{{style:{{fontSize:"13px",fontWeight:500,lineHeight:"18px"}}}},_tx),'
+                + "_acts.map(((_ac,_ai)=>{if(!_ac)return null;"
+                + 'const _alb=_ac.actionLabelv2&&"object"==typeof _ac.actionLabelv2?_ac.actionLabelv2[_lg]||_ac.actionLabelv2.vi||_ac.actionLabel:_ac.actionLabel;'
+                + f'return _alb?{react_v}.a.createElement("button",{{key:_ai,type:"button",className:"clickable",'
+                + 'style:{border:"none",borderRadius:"6px",padding:"5px 12px",background:"#0068ff",color:"#fff",fontSize:"12px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"},'
+                + 'onClick:_ev=>{_ev.stopPropagation(),_ev.preventDefault(),window.dispatchEvent(new CustomEvent("zalux:call-action",'
+                + "{detail:{convId:e&&(e.toUid||e.idTo),msgId:e&&e.msgId,actionType:_ac.actionType,actionData:_ac.actionData}}))}},_alb):null})))"
+                + "}catch(_ze){return null}})()"
+            )
+
+        direct_expr = make_card_expr(True)
+        fallback_expr = make_card_expr(False)
+        old_direct_marker = "const _zaDirectCard="
+        if old_direct_marker in sub and "_isCallAct=" not in sub:
+            i_dc = sub.find(old_direct_marker)
+            i_ret = sub.find(";if(_zaDirectCard)return _zaDirectCard;", i_dc)
+            if i_dc != -1 and i_ret != -1:
+                sub = sub[:i_dc] + f"const _zaDirectCard={direct_expr}" + sub[i_ret:]
+                text = text[:idx_ojt1] + sub + text[idx_ojt1 + 7500 :]
+                hits += 1
+        elif "_zaDirectCard" not in sub:
             re_frag = re.compile(
                 rf"return {re.escape(react_v)}\.a\.useEffect\(\(\(\)=>\{{[A-Za-z_$][\w$]*\(\)\}}\),\[[A-Za-z_$][\w$]*\]\),"
                 rf"{re.escape(react_v)}\.a\.useEffect\(\(\(\)=>\(\)=>{{[^}}]+\}}\),\[\]\),"
@@ -303,7 +327,7 @@ def patch_pc_bundle(path: Path) -> int:
             new_frag = (
                 eff_prefix
                 + f"(()=>{{"
-                + f"const _zaDirectCard={fallback_expr};"
+                + f"const _zaDirectCard={direct_expr};"
                 + f"if(_zaDirectCard)return _zaDirectCard;"
                 + f"return {react_v}.a.createElement({react_v}.a.Fragment,null,"
             )
