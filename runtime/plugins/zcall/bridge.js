@@ -40,13 +40,18 @@ function resolveAssetsDir() {
 
 function findMainAppWindow() {
   try {
+    let fallbackWin = null;
     for (const win of BrowserWindow.getAllWindows()) {
-      if (!isAlive(win) || win === callWin || win === incomingWin) continue;
+      if (!isAlive(win) || win === callWin || win === incomingWin || win.__zaluxCallWindow) continue;
       if (win.__zaloSharedWorker) continue;
       const title = (typeof win.getTitle === 'function' && win.getTitle()) || '';
       if (title === 'Shared Worker') continue;
-      return win;
+      const url = (win.webContents && typeof win.webContents.getURL === 'function' && win.webContents.getURL()) || '';
+      if (url.includes('shared-worker.html') || url.includes('/plugins/zcall/ui/')) continue;
+      if (url.includes('index.html')) return win;
+      if (!fallbackWin) fallbackWin = win;
     }
+    return fallbackWin;
   } catch (_) {}
   return null;
 }
@@ -404,6 +409,7 @@ function ensureIncomingWindow(stateObj) {
     },
   });
   incomingWin = createdIncoming;
+  createdIncoming.__zaluxCallWindow = true;
   createdIncoming.setMenu(null);
   createdIncoming.webContents.on('will-navigate', (e) => e.preventDefault());
   createdIncoming.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
@@ -488,6 +494,7 @@ function ensureCallWindow(stateObj) {
     },
   });
   callWin = createdCall;
+  createdCall.__zaluxCallWindow = true;
   createdCall.setMenu(null);
   createdCall.webContents.on('will-navigate', (e) => e.preventDefault());
   createdCall.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
